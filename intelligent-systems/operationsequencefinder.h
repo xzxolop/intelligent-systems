@@ -40,6 +40,7 @@ public:
             NodeType* root = new NodeType(source, nullptr);           
             deq.push_back(root);
             rootPointer = root;
+            currentElem = root;
         }
     }
 
@@ -52,19 +53,36 @@ public:
             return 1;
         }
 
-        int a = 200;
-        while (a > 0) {
-            NodeType* node = deq.front();
-            deq.pop_front();
-
+        for (int i = 0; i < 500000; i++) {
+            NodeType* node = deq.at(i);
             if (node) {
-                std::cout << node->data << std::endl;
+                //std::cout << node->data << std::endl;
+
+                isFind = checkNode(node);
+
+                if (isFind) {
+                    std::cout << "find" << std::endl;
+                    return calcDeep(node);
+                }
             }
 
             createNode(node);
-
-            a--;
         }
+    }
+
+    int calcDeep(NodeType* node) {
+        /*if (!node->parent) {
+            return 0;
+        }*/
+
+        int cnt = 0;
+        while (node != nullptr) {
+            node = node->parent;
+            cnt++;
+        }
+
+        return cnt;
+
     }
 
     void createNode(NodeType* parent)
@@ -81,7 +99,6 @@ public:
     }
 
     bool checkNode(const NodeType* node) {
-        std::cout << "data: " << node->data << std::endl;
         if (node->data == target) {
             return true;
         }
@@ -125,5 +142,6 @@ private:
     ValueType source;
     ValueType target;
 
+    NodeType* currentElem;
 };
 

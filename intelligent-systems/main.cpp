@@ -45,8 +45,10 @@ int main() {
 
 	BFS(&root);*/
 
-	OperationSequenceFinder finder{ 2, 100 };
-	finder.findSequence(finder.rootPointer);
+	OperationSequenceFinder finder{ 2, 1000 };
+	int deep = finder.findSequence(finder.rootPointer);
+
+	std::cout << "deep: " << deep;
 
 	return 0;
 }
