@@ -71,12 +71,12 @@ public:
     }
 
     int calcDeep(NodeType* node) {
-        /*if (!node->parent) {
+        if (!node->parent) {
             return 0;
-        }*/
+        }
 
         int cnt = 0;
-        while (node != nullptr) {
+        while (node->parent != nullptr) {
             node = node->parent;
             cnt++;
         }
