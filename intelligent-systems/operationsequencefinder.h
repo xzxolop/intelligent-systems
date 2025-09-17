@@ -11,38 +11,59 @@ class OperationSequenceFinder
     class Node {
     public:
         T data;
-        //Node* prev;
+        Node* parent;
 
-        int index; // Note: мб сделать size_t
+        T getData() const noexcept {
+            return data;
+        }
 
-        Node(T data, int index) {
+        Node(T data, Node* parent) {
             this->data = data;
-            //this->prev = prev;
-            this->index = index;
+            this->parent = parent;
         };
     };
 
     using ValueType = int;
     using NodeType = Node<ValueType>;
-    using Container = std::deque<NodeType>;
+    using Container = std::deque<NodeType*>; // what bad in poiners?
     
     int CountOperations = 2;
 
 public:
-    OperationSequenceFinder(ValueType source, ValueType target);
+    NodeType* rootPointer;
 
-    int findSequence()
-    {
-        NodeType root{ source, 0 };
-        deq.push_back(root);
-        //createNode(root);
-        bool isCheck = checkNode();
+    OperationSequenceFinder(ValueType source, ValueType target) {
+        {
+            this->source = source;
+            this->target = target;
 
-        if (isCheck) {
-            std::cout << "find" << std::endl;
+            NodeType* root = new NodeType(source, nullptr);           
+            deq.push_back(root);
+            rootPointer = root;
         }
-        else {
-            std::cout << "not find" << std::endl;
+    }
+
+    int findSequence(NodeType* node)
+    {
+        bool isFind = checkNode(node);
+
+        if (isFind) {
+            std::cout << "find" << std::endl;
+            return 1;
+        }
+
+        int a = 200;
+        while (a > 0) {
+            NodeType* node = deq.front();
+            deq.pop_front();
+
+            if (node) {
+                std::cout << node->data << std::endl;
+            }
+
+            createNode(node);
+
+            a--;
         }
     }
 
@@ -52,49 +73,51 @@ public:
             return;
         }
 
-        int index = parent - rootPointer;
-        std::cout << "parent: " << parent << " rootPointer: " << rootPointer << " index: " << index << std::endl;
-
-        NodeType left{ parent->data + 3, index };
-        NodeType right{ parent->data * 2, index };
+        NodeType* left = new NodeType{ parent->data + 3, parent};
+        NodeType* right = new NodeType{ parent->data * 2, parent };
 
         deq.push_back(left);
         deq.push_back(right);
     }
 
-    bool checkNode()
+    bool checkNode(const NodeType* node) {
+        std::cout << "data: " << node->data << std::endl;
+        if (node->data == target) {
+            return true;
+        }
+        else return false;
+    }
+
+    bool checkLastTwoNodes()
     {
         auto lastNodes = getLastNodes();
         for (int i = 0; i < lastNodes.size(); i++) {
-            std::cout << lastNodes.at(i).data << std::endl;
-            if (lastNodes.at(i).data == target) {
+            auto node = lastNodes.at(i);
+            std::cout << "data: " << node->data << std::endl;
+            if (lastNodes.at(i)->data == target) {
                 std::cout << "find!" << std::endl;
                 return true;
             }
         }
 
-        std::cout << "target node is not find" << std::endl;
-
         return false;
     }
 
-    std::vector<NodeType> getLastNodes() {
-        std::vector<NodeType> vec;
-        for (int i = deq.size() - CountOperations - 1; i < deq.size(); i++) {
-            vec.push_back(deq[i]);
+    std::vector<NodeType*> getLastNodes() {
+        std::vector<NodeType*> vec;
+       
+
+        if (deq.size() >= 2) {
+            for (int i = deq.size() - CountOperations - 1; i < deq.size(); i++) {
+                vec.push_back(deq[i]);
+            }
+        }
+
+        if (deq.size() == 1) {
+            vec.push_back(deq[0]);
         }
         return vec;
     }
-
-    /*NodeType getLast() {
-       return deq.back();
-    }
-
-    NodeType getPreLast() {
-        return deq[deq.size() - 2];
-    }*/
-
-
 
 private:
     Container deq;
@@ -102,6 +125,5 @@ private:
     ValueType source;
     ValueType target;
 
-    NodeType* rootPointer;
 };
 
