@@ -5,9 +5,11 @@ OperationSequenceFinder::OperationSequenceFinder(ValueType source, ValueType tar
 	this->source = source;
 	this->target = target;
 
-	NodeType root{ source, nullptr };
+	NodeType root{ source, -1 };
 	deq.push_back(root);
-	createNode(&root);
+	rootPointer = &deq[0];
+	createNode(&deq[0]);
+
 	bool isCheck = checkNode();
 
 	if (isCheck) {

@@ -11,11 +11,14 @@ class OperationSequenceFinder
     class Node {
     public:
         T data;
-        Node* prev;
+        //Node* prev;
 
-        Node(T data, Node* prev) {
+        int index; // Note: мб сделать size_t
+
+        Node(T data, int index) {
             this->data = data;
-            this->prev = prev;
+            //this->prev = prev;
+            this->index = index;
         };
     };
 
@@ -30,9 +33,9 @@ public:
 
     int findSequence()
     {
-        NodeType root{ source, nullptr };
+        NodeType root{ source, 0 };
         deq.push_back(root);
-        createNode(&root);
+        //createNode(root);
         bool isCheck = checkNode();
 
         if (isCheck) {
@@ -49,8 +52,11 @@ public:
             return;
         }
 
-        NodeType left{ parent->data + 3, parent };
-        NodeType right{ parent->data * 2, parent };
+        int index = parent - rootPointer;
+        std::cout << "parent: " << parent << " rootPointer: " << rootPointer << " index: " << index << std::endl;
+
+        NodeType left{ parent->data + 3, index };
+        NodeType right{ parent->data * 2, index };
 
         deq.push_back(left);
         deq.push_back(right);
@@ -95,5 +101,7 @@ private:
 
     ValueType source;
     ValueType target;
+
+    NodeType* rootPointer;
 };
 
