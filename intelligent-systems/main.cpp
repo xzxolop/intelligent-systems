@@ -1,6 +1,7 @@
 #include <iostream>
 #include <deque>
 #include <stack>
+#include <chrono>
 
 #include "OperationSequenceFinder.h"
 
@@ -63,11 +64,19 @@ int main() {
 	DFS(&root);*/
 
 	OperationSequenceFinder finder{};
-	int deep = finder.findSequenceBFS(1, 100, 20);
+	int deep = finder.findSequenceBFS(1, 100, 2);
 	std::cout << "deep: " << deep << std::endl << std::endl;;
 
-	deep = finder.findSequenceDFS(2, 10000001, 32);
+
+	auto start = std::chrono::high_resolution_clock::now();
+	
+	deep = finder.findSequenceDFS(2, 10000001, 31);
 	std::cout << "deep: " << deep << std::endl << std::endl;;
+
+	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;
+
+	
 
 	/*deep = finder.findSequence(2, 55);
 	std::cout << "deep: " << deep << std::endl << std::endl;;
