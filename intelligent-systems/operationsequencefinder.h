@@ -8,7 +8,7 @@
 
 class OperationSequenceFinder
 {
-    // NOTE: לב גûםוסעט ‎עמ ג מעהוכüםûי פאיכ
+    // NOTE: move to different file ?
     template<typename T>
     class Node {
     public:
@@ -85,15 +85,14 @@ public:
             return 0;
         }
 
-        //for (int i = 0; i < treeSize; i++) {
         while(!deq.empty()) {
-            NodeType* node = deq.front(); //= deq.at(i);
+            NodeType* node = deq.front();
             deq.pop_front();
             if (node) {
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return node->depth; //calcDeep(node);
+                    return node->depth;
                 }
 
                 currentDepth.insert(node->depth + 1);
