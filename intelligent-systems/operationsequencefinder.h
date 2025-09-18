@@ -3,6 +3,7 @@
 #include <deque>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 class OperationSequenceFinder
 {
@@ -27,12 +28,14 @@ class OperationSequenceFinder
     using NodeType = Node<ValueType>;
     using Container = std::deque<NodeType*>; // what bad in poiners?
     
-    int CountOperations = 2;
+    unsigned short countOperations = 2;
+    unsigned short searchDepth = 20;
+    size_t treeSize;
 
 public:
     NodeType* rootPointer;
 
-    OperationSequenceFinder(ValueType source, ValueType target) {
+    OperationSequenceFinder(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         {
             this->source = source;
             this->target = target;
@@ -41,6 +44,15 @@ public:
             deq.push_back(root);
             rootPointer = root;
             currentElem = root;
+
+            if (countOperations < 2) {
+                treeSize = searchDepth;
+            }
+            else {
+                treeSize = pow(countOperations, searchDepth);
+            }
+
+            std::cout << "size:" << treeSize << std::endl;
         }
     }
 
@@ -53,7 +65,7 @@ public:
             return 1;
         }
 
-        for (int i = 0; i < 500000; i++) {
+        for (int i = 0; i < treeSize; i++) {
             NodeType* node = deq.at(i);
             if (node) {
                 //std::cout << node->data << std::endl;
@@ -125,7 +137,7 @@ public:
        
 
         if (deq.size() >= 2) {
-            for (int i = deq.size() - CountOperations - 1; i < deq.size(); i++) {
+            for (int i = deq.size() - countOperations - 1; i < deq.size(); i++) {
                 vec.push_back(deq[i]);
             }
         }

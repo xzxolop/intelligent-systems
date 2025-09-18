@@ -20,26 +20,26 @@ void BFS(Node* root) {
 	std::deque<Node*> deq;
 	deq.push_back(root);
 
-	while (!deq.empty()) {
+	//while (!deq.empty()) {
 		for (int i = 0; i < deq.size(); i++) {
 			Node* node = deq.front();
 			deq.pop_front();
 
 			if (node) {
 				std::cout << node->data << std::endl;
-
+				deq.push_back(node->left);
+				deq.push_back(node->right);
 			}
-			deq.push_back(node->left);
-			deq.push_back(node->right);
-
 		}
-	}
+	//}
 
 }
 
 int main() {
-	/*Node n2{ 3, nullptr, nullptr};
-	Node n1{ 2, nullptr, nullptr};
+	/*Node n4{ 5, nullptr, nullptr };
+	Node n3{ 4, nullptr, nullptr };
+	Node n2{ 3, nullptr, nullptr};
+	Node n1{ 2, &n3, &n4};
 
 	Node root{1, &n1, &n2};
 
@@ -47,7 +47,6 @@ int main() {
 
 	OperationSequenceFinder finder{ 2, 1000 };
 	int deep = finder.findSequence(finder.rootPointer);
-
 	std::cout << "deep: " << deep;
 
 	return 0;
