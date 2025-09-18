@@ -1,5 +1,6 @@
 #include <iostream>
 #include <deque>
+#include <stack>
 
 #include "OperationSequenceFinder.h"
 
@@ -20,19 +21,32 @@ void BFS(Node* root) {
 	std::deque<Node*> deq;
 	deq.push_back(root);
 
-	//while (!deq.empty()) {
-		for (int i = 0; i < deq.size(); i++) {
-			Node* node = deq.front();
-			deq.pop_front();
+	for (int i = 0; i < deq.size(); i++) {
+		Node* node = deq.front();
+		deq.pop_front();
 
-			if (node) {
-				std::cout << node->data << std::endl;
-				deq.push_back(node->left);
-				deq.push_back(node->right);
-			}
+		if (node) {
+			std::cout << node->data << std::endl;
+			deq.push_back(node->left);
+			deq.push_back(node->right);
 		}
-	//}
+	}
+}
 
+void DFS(Node* root) {
+	std::stack<Node*> stack;
+	stack.push(root);
+
+	while (!stack.empty()) {
+		Node* node = stack.top();
+		stack.pop();
+
+		if (node) {
+			std::cout << node->data << std::endl;
+			stack.push(node->left);
+			stack.push(node->right);
+		}
+	}
 }
 
 int main() {
@@ -43,13 +57,19 @@ int main() {
 
 	Node root{1, &n1, &n2};
 
-	BFS(&root);*/
+	BFS(&root);
+	std::cout << std::endl;
+
+	DFS(&root);*/
 
 	OperationSequenceFinder finder{};
-	int deep = finder.findSequence(1, 100);
+	int deep = finder.findSequenceBFS(1, 100, 20);
 	std::cout << "deep: " << deep << std::endl << std::endl;;
 
-	deep = finder.findSequence(2, 55);
+	deep = finder.findSequenceDFS(2, 10000001, 32);
+	std::cout << "deep: " << deep << std::endl << std::endl;;
+
+	/*deep = finder.findSequence(2, 55);
 	std::cout << "deep: " << deep << std::endl << std::endl;;
 
 	deep = finder.findSequence(2, 100);
@@ -62,7 +82,7 @@ int main() {
 	std::cout << "deep: " << deep << std::endl << std::endl;;
 
 	deep = finder.findSequence(2, 10000001, 32);
-	std::cout << "deep: " << deep << std::endl << std::endl;;
+	std::cout << "deep: " << deep << std::endl << std::endl;;*/
 
 	return 0;
 }

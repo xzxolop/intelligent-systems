@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <set>
+#include <stack>
 
 class OperationSequenceFinder
 {
@@ -27,10 +28,9 @@ class OperationSequenceFinder
 
     using ValueType = int;
     using NodeType = Node<ValueType>;
-    using Container = std::deque<NodeType*>; // what bad in poiners?
     
     unsigned short countOperations = 2;
-    unsigned short searchDepth = 20;
+    unsigned short searchDepth;
     size_t treeSize;
 
     std::set<unsigned short> currentDepth;
@@ -52,9 +52,10 @@ public:
         clear();
     }
 
-    int findSequence(ValueType source, ValueType target, unsigned short searchDepth = 20) {
+    int findSequenceBFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
+        this->searchDepth = searchDepth;
 
         NodeType* root = new NodeType(source, 0);
         deq.push_back(root);
@@ -70,14 +71,14 @@ public:
 
         std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
 
-        int deepth = BfsFinder(rootPointer);
+        int deepth = BFSFinder(rootPointer);
         clear();
 
         std::cout << "deq size: " << deq.size() << std::endl;
         return deepth;
     }
 
-    int BfsFinder(NodeType* node)
+    int BFSFinder(NodeType* node)
     {
         bool isFind = checkNode(node);
 
@@ -101,15 +102,80 @@ public:
                     setSize = currentDepth.size();
                 }
 
-                createNode(node, node->depth + 1);
+                if (node->depth + 1 <= searchDepth) {
+                    createNodeDeq(node, node->depth + 1);
+                }
 
                 delete node;
             }
             
         }
+
+        std::cout << "not find" << std::endl;
+        return -1;
     }
 
-    void createNode(NodeType* parent, unsigned short depth)
+    int DFSFinder(NodeType* node) {
+
+        bool isFind = checkNode(node);
+
+        if (isFind) {
+            return 0;
+        }
+
+        while (!stack.empty()) {
+            NodeType* node = stack.top();
+            stack.pop();
+
+            if (node) {
+                isFind = checkNode(node);
+                if (isFind) {
+                    return node->depth;
+                }
+                currentDepth.insert(node->depth + 1);
+                if (setSize != currentDepth.size()) {
+                    std::cout << "Depth is " << currentDepth.size() << ", stack size: " << stack.size() << "; " << std::endl;
+                    setSize = currentDepth.size();
+                }
+
+                if (node->depth + 1 <= searchDepth) {
+                    createNodeStack(node, node->depth + 1);
+                }
+                delete node;
+            }
+        }
+
+        std::cout << "not find" << std::endl;
+        return -1;
+    }
+
+    int findSequenceDFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
+        this->source = source;
+        this->target = target;
+        this->searchDepth = searchDepth;
+
+        NodeType* root = new NodeType(source, 0);
+        stack.push(root);
+        rootPointer = root;
+        currentElem = root;
+
+        if (countOperations < 2) {
+            treeSize = searchDepth;
+        }
+        else {
+            treeSize = pow(countOperations, searchDepth);
+        }
+
+        std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
+
+        int deepth = DFSFinder(rootPointer);
+        clear();
+
+        std::cout << "deq size: " << stack.size() << std::endl;
+        return deepth;
+    }
+
+    void createNodeDeq(NodeType* parent, unsigned short depth)
     {
         if (!parent) {
             return;
@@ -120,6 +186,17 @@ public:
 
         deq.push_back(left);
         deq.push_back(right);
+    }
+
+    void createNodeStack(NodeType* parent, unsigned short depth) {
+        if (!parent) {
+            return;
+        }
+        NodeType* left = new NodeType{ parent->data + 3, depth };
+        NodeType* right = new NodeType{ parent->data * 2, depth };
+
+        stack.push(left);
+        stack.push(right);
     }
 
     bool checkNode(const NodeType* node) {
@@ -165,12 +242,21 @@ public:
             delete ptr;
         }
         deq.clear();
+        
+
+        while (!stack.empty()) {
+            NodeType* ptr = stack.top();
+            delete ptr;
+            stack.pop();
+        }
+
         currentDepth.clear();
         setSize = 0;
     }
 
 private:
-    Container deq;
+    std::deque<NodeType*> deq;
+    std::stack<NodeType*> stack;
 
     ValueType source;
     ValueType target;
