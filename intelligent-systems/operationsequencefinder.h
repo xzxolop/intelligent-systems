@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <set>
 
 class OperationSequenceFinder
 {
@@ -12,15 +13,15 @@ class OperationSequenceFinder
     class Node {
     public:
         T data;
-        Node* parent;
+        unsigned short depth;
 
         T getData() const noexcept {
             return data;
         }
 
-        Node(T data, Node* parent) {
+        Node(T data, unsigned short depth) {
             this->data = data;
-            this->parent = parent;
+            this->depth = depth;
         };
     };
 
@@ -32,6 +33,9 @@ class OperationSequenceFinder
     unsigned short searchDepth = 20;
     size_t treeSize;
 
+    std::set<unsigned short> currentDepth;
+    size_t setSize;
+
 public:
     NodeType* rootPointer;
 
@@ -41,13 +45,18 @@ public:
         , source{0}
         , target{0}
         , treeSize{0}
+        , setSize{ currentDepth.size() }
     {}
+
+    ~OperationSequenceFinder() {
+        clear();
+    }
 
     int findSequence(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
 
-        NodeType* root = new NodeType(source, nullptr);
+        NodeType* root = new NodeType(source, 0);
         deq.push_back(root);
         rootPointer = root;
         currentElem = root;
@@ -61,7 +70,11 @@ public:
 
         std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
 
-        return BfsFinder(rootPointer);
+        int deepth = BfsFinder(rootPointer);
+        clear();
+
+        std::cout << "deq size: " << deq.size() << std::endl;
+        return deepth;
     }
 
     int BfsFinder(NodeType* node)
@@ -72,43 +85,39 @@ public:
             return 0;
         }
 
-        for (int i = 0; i < treeSize; i++) {
-            NodeType* node = deq.at(i);
+        //for (int i = 0; i < treeSize; i++) {
+        while(!deq.empty()) {
+            NodeType* node = deq.front(); //= deq.at(i);
+            deq.pop_front();
             if (node) {
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return calcDeep(node);
+                    return node->depth; //calcDeep(node);
                 }
+
+                currentDepth.insert(node->depth + 1);
+                if (setSize != currentDepth.size()) {
+                    std::cout << "Depth is " << currentDepth.size() << ", deque size: " << deq.size() << "; " << std::endl;
+                    setSize = currentDepth.size();
+                }
+
+                createNode(node, node->depth + 1);
+
+                delete node;
             }
-
-            createNode(node);
+            
         }
     }
 
-    int calcDeep(NodeType* node) {
-        if (!node->parent) {
-            return 0;
-        }
-
-        int cnt = 0;
-        while (node->parent != nullptr) {
-            node = node->parent;
-            cnt++;
-        }
-
-        return cnt;
-
-    }
-
-    void createNode(NodeType* parent)
+    void createNode(NodeType* parent, unsigned short depth)
     {
         if (!parent) {
             return;
         }
 
-        NodeType* left = new NodeType{ parent->data + 3, parent};
-        NodeType* right = new NodeType{ parent->data * 2, parent };
+        NodeType* left = new NodeType{ parent->data + 3, depth };
+        NodeType* right = new NodeType{ parent->data * 2, depth };
 
         deq.push_back(left);
         deq.push_back(right);
@@ -150,6 +159,15 @@ public:
             vec.push_back(deq[0]);
         }
         return vec;
+    }
+
+    void clear() {
+        for (NodeType* ptr : deq) {
+            delete ptr;
+        }
+        deq.clear();
+        currentDepth.clear();
+        setSize = 0;
     }
 
 private:
