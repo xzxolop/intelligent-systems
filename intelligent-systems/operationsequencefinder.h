@@ -35,45 +35,49 @@ class OperationSequenceFinder
 public:
     NodeType* rootPointer;
 
-    OperationSequenceFinder(ValueType source, ValueType target, unsigned short searchDepth = 20) {
-        {
-            this->source = source;
-            this->target = target;
+    OperationSequenceFinder() 
+        : currentElem{nullptr}
+        , rootPointer{nullptr}
+        , source{0}
+        , target{0}
+        , treeSize{0}
+    {}
 
-            NodeType* root = new NodeType(source, nullptr);           
-            deq.push_back(root);
-            rootPointer = root;
-            currentElem = root;
+    int findSequence(ValueType source, ValueType target, unsigned short searchDepth = 20) {
+        this->source = source;
+        this->target = target;
 
-            if (countOperations < 2) {
-                treeSize = searchDepth;
-            }
-            else {
-                treeSize = pow(countOperations, searchDepth);
-            }
+        NodeType* root = new NodeType(source, nullptr);
+        deq.push_back(root);
+        rootPointer = root;
+        currentElem = root;
 
-            std::cout << "size:" << treeSize << std::endl;
+        if (countOperations < 2) {
+            treeSize = searchDepth;
         }
+        else {
+            treeSize = pow(countOperations, searchDepth);
+        }
+
+        std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
+
+        return BfsFinder(rootPointer);
     }
 
-    int findSequence(NodeType* node)
+    int BfsFinder(NodeType* node)
     {
         bool isFind = checkNode(node);
 
         if (isFind) {
-            std::cout << "find" << std::endl;
-            return 1;
+            return 0;
         }
 
         for (int i = 0; i < treeSize; i++) {
             NodeType* node = deq.at(i);
             if (node) {
-                //std::cout << node->data << std::endl;
-
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    std::cout << "find" << std::endl;
                     return calcDeep(node);
                 }
             }
