@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <deque>
 #include <iostream>
@@ -6,6 +6,8 @@
 #include <cmath>
 #include <set>
 #include <stack>
+#include <unordered_set>
+#include <type_traits>
 
 class OperationSequenceFinder
 {
@@ -34,7 +36,15 @@ class OperationSequenceFinder
     size_t treeSize;
 
     std::set<unsigned short> currentDepth;
+    std::unordered_set<ValueType> visitedValues;
     size_t setSize;
+
+    //using Container = std::deque<NodeType*>;
+    //Container cont;
+
+    // NOTE: на макросах скорость будет чуть больше чем на if. Мб выход из ситуации constexpr if.
+//#define IS_DEQUE(Container) std::is_same_v<Container, std::deque<NodeType*>>
+//#define IS_STACK(Container) std::is_same_v<Container, std::stack<NodeType*>>
 
 public:
     NodeType* rootPointer;
@@ -52,7 +62,7 @@ public:
         clear();
     }
 
-    // � ������
+    // В ширину
     int findSequenceBFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
@@ -116,7 +126,7 @@ public:
         return -1;
     }
 
-    // � �������
+    // В глубину
     int findSequenceDFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
@@ -157,28 +167,16 @@ public:
             stack.pop();
 
             if (node) {
-                /*if (node->data < 10000001 + 1000 && node->data > 10000001 - 1000) {
-                    std::cout << node->data << std::endl;
-                }*/
-
-                /*if (node->data > max) {
-                    max = node->data;
-                    std::cout << "max: " << max << " " << node->depth << std::endl;
-                }*/
-
                 isFind = checkNode(node);
-               //std::cout << "check: " << node->data << std::endl;
 
                 if (isFind) {
                     return node->depth;
                 }
                 currentDepth.insert(node->depth + 1);
-                if (setSize != currentDepth.size()) {
-                    //std::cout << "data: " << node->data << " Depth is " << currentDepth.size() << ", stack size: " << stack.size() << "; " << std::endl;
+                if (setSize != currentDepth.size()) {  
                     setSize = currentDepth.size();
                 }
 
-                //std::cout << "n->d + 1:" << node->depth + 1 << searchDepth << std::endl;
                 if (node->depth + 1 < searchDepth) {
                     createNodeStack(node, node->depth + 1);
                 }
@@ -196,22 +194,38 @@ public:
             return;
         }
 
-        NodeType* left = new NodeType{ parent->data + 3, depth };
-        NodeType* right = new NodeType{ parent->data * 2, depth };
-
-        deq.push_back(left);
-        deq.push_back(right);
+        ValueType newValue = parent->data + 3;
+        createNodeIfNotVisitedDeq(newValue, depth);
+        
+        newValue = parent->data * 2;
+        createNodeIfNotVisitedDeq(newValue, depth);
     }
 
     void createNodeStack(NodeType* parent, unsigned short depth) {
         if (!parent) {
             return;
         }
-        NodeType* left = new NodeType{ parent->data + 3, depth };
-        NodeType* right = new NodeType{ parent->data * 2, depth };
 
-        stack.push(left);
-        stack.push(right);
+        ValueType newValue = parent->data + 3;
+        createNodeIfNotVisitedStack(newValue, depth);
+
+        newValue = parent->data * 2;
+        createNodeIfNotVisitedStack(newValue, depth);
+    }
+
+    // NOTE: добавить флаг в каком контейнере мы работаем и куда добавлять эл-ты.
+    void createNodeIfNotVisitedDeq(const ValueType value, const unsigned short depth) {
+        if (visitedValues.find(value) == visitedValues.end()) {
+            NodeType* node = new NodeType{ value, depth };
+            deq.push_back(node);
+        }
+    }
+
+    void createNodeIfNotVisitedStack(const ValueType value, const unsigned short depth) {
+        if (visitedValues.find(value) == visitedValues.end()) {
+            NodeType* node = new NodeType{ value, depth };
+            stack.push(node);
+        }
     }
 
     bool checkNode(const NodeType* node) {
@@ -265,6 +279,7 @@ public:
             stack.pop();
         }
 
+        visitedValues.clear();
         currentDepth.clear();
         setSize = 0;
     }
