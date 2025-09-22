@@ -216,6 +216,7 @@ public:
     // NOTE: добавить флаг в каком контейнере мы работаем и куда добавлять эл-ты.
     void createNodeIfNotVisitedDeq(const ValueType value, const unsigned short depth) {
         if (visitedValues.find(value) == visitedValues.end()) {
+            visitedValues.insert(value);
             NodeType* node = new NodeType{ value, depth };
             deq.push_back(node);
         }
@@ -223,6 +224,8 @@ public:
 
     void createNodeIfNotVisitedStack(const ValueType value, const unsigned short depth) {
         if (visitedValues.find(value) == visitedValues.end()) {
+            visitedValues.insert(value);
+            std::cout << value << std::endl;
             NodeType* node = new NodeType{ value, depth };
             stack.push(node);
         }

@@ -66,15 +66,15 @@ int main() {
 	OperationSequenceFinder finder{};
 
 	auto start = std::chrono::high_resolution_clock::now();
-	int deep = finder.findSequenceBFS(2, 1000, 20);
-	std::cout << "deep: " << deep << std::endl << std::endl;;
+	//int deep = finder.findSequenceBFS(2, 1000, 20);
+	//std::cout << "deep: " << deep << std::endl << std::endl;;
 	auto end = std::chrono::high_resolution_clock::now();
 	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;
 
 	start = std::chrono::high_resolution_clock::now();
 	
 	//deep = finder.findSequenceDFS(2, 1000, 15);
-	deep = finder.findSequenceDFS(2, 10000001, 31);
+	int deep = finder.findSequenceDFS(2, 1000, 15);
 	std::cout << "deep: " << deep << std::endl << std::endl;;
 
 	end = std::chrono::high_resolution_clock::now();
