@@ -53,37 +53,55 @@ void DFS(Node* root) {
 	}
 }
 
-int main() {
-
-
+void binTreeTest() 
+{
 	/*Node n4{ 5, nullptr, nullptr };
-	Node n3{ 4, nullptr, nullptr };
-	Node n2{ 3, nullptr, nullptr};
-	Node n1{ 2, &n3, &n4};
+Node n3{ 4, nullptr, nullptr };
+Node n2{ 3, nullptr, nullptr};
+Node n1{ 2, &n3, &n4};
 
-	Node root{1, &n1, &n2};
+Node root{1, &n1, &n2};
 
-	BFS(&root);
-	std::cout << std::endl;
+BFS(&root);
+std::cout << std::endl;
 
-	DFS(&root);*/
+DFS(&root);*/
+}
 
+
+int f1(int a) {
+	return a * 2;
+}
+int f2(int a) {
+	return a + 3;
+}
+int f3(int a) {
+	return a * 1000;
+}
+
+void OperationSequenceFinderTest() 
+{
 	OperationSequenceFinder finder{};
 
+	std::vector<std::function<int(int)>> operations;
+	operations.push_back(f1);
+	operations.push_back(f2);
+	operations.push_back(f3);
+
+	finder.setOperations(operations);
+
 	auto start = std::chrono::high_resolution_clock::now();
-	auto res = finder.findSequenceDFS(2, 100, 20);
-	res.print();
+	//auto res = finder.findSequenceDFS(2, 100, 20);
+	//res.print();
 	auto end = std::chrono::high_resolution_clock::now();
 	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;
 
 
 	start = std::chrono::high_resolution_clock::now();
-	res = finder.findSequenceBFS(2, 10000001, 31);
+	auto res = finder.findSequenceBFS(1, 1000000, 10);
 	res.print();
 	end = std::chrono::high_resolution_clock::now();
 	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;
-
-	
 
 	/*deep = finder.findSequence(2, 55);
 	std::cout << "deep: " << deep << std::endl << std::endl;;
@@ -99,6 +117,12 @@ int main() {
 
 	deep = finder.findSequence(2, 10000001, 32);
 	std::cout << "deep: " << deep << std::endl << std::endl;;*/
+}
+
+int main() {
+
+	OperationSequenceFinderTest();
+
 
 	return 0;
 }

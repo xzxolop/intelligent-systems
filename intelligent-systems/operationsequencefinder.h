@@ -8,6 +8,7 @@
 #include <stack>
 #include <unordered_set>
 #include <type_traits>
+#include <functional>
 
 #include "macros.h"
 
@@ -106,6 +107,11 @@ public:
     ~OperationSequenceFinder() {
         clear();
     }
+
+    void setOperations(const std::vector<std::function<int(int)>>& operations) 
+    {
+        _operations = operations;
+    };
 
     // В ширину
     FinderResult findSequenceBFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
@@ -235,11 +241,10 @@ public:
             return;
         }
 
-        ValueType newValue = parent->data + 3;
-        createNodeIfNotVisitedDeq(newValue, depth);
-        
-        newValue = parent->data * 2;
-        createNodeIfNotVisitedDeq(newValue, depth);
+        for (auto x : _operations) {
+
+            createNodeIfNotVisitedDeq(x(parent->data), depth);
+        }
     }
 
     void createNodeStack(NodeType* parent, unsigned short depth) {
@@ -327,6 +332,8 @@ public:
     }
 
 private:
+    std::vector<std::function<int(int)>> _operations;
+
     std::deque<NodeType*> deq;
     std::stack<NodeType*> stack;
 
