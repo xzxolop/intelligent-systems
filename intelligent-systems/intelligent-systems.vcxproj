@@ -127,6 +127,7 @@
     <ClCompile Include="OperationSequenceFinder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="macros.h" />
     <ClInclude Include="OperationSequenceFinder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

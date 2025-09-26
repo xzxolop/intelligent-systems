@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <type_traits>
 
+#include "macros.h"
+
 class OperationSequenceFinder
 {
     // NOTE: move to different file ?
@@ -123,7 +125,7 @@ public:
             treeSize = pow(countOperations, searchDepth);
         }
 
-        std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
+        DEBUG_LOG("source: " << source << " target: " << target << " size: " << treeSize);
 
         FinderResult res = BFSFinder(rootPointer);
         clear();
@@ -151,7 +153,7 @@ public:
 
                 currentDepth.insert(node->depth + 1);
                 if (setSize != currentDepth.size()) {
-                    std::cout << "Depth is " << currentDepth.size() << ", deque size: " << deq.size() << "; " << std::endl;
+                    DEBUG_LOG("Depth is " << currentDepth.size() << ", deque size: " << deq.size() << "; ");
                     setSize = currentDepth.size();
                 }
 
@@ -184,7 +186,7 @@ public:
             treeSize = pow(countOperations, searchDepth);
         }
 
-        std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
+        DEBUG_LOG("source: " << source << " target: " << target << " size: " << treeSize);
 
         FinderResult res = DFSFinder(rootPointer);
         clear();
@@ -264,7 +266,7 @@ public:
     void createNodeIfNotVisitedStack(const ValueType value, const unsigned short depth) {
         if (visitedValues.find(value) == visitedValues.end()) {
             visitedValues.insert(value);
-            std::cout << value << std::endl;
+            DEBUG_LOG(value);
             NodeType* node = new NodeType{ value, depth };
             stack.push(node);
         }
@@ -282,9 +284,7 @@ public:
         auto lastNodes = getLastNodes();
         for (int i = 0; i < lastNodes.size(); i++) {
             auto node = lastNodes.at(i);
-            std::cout << "data: " << node->data << std::endl;
             if (lastNodes.at(i)->data == target) {
-                std::cout << "find!" << std::endl;
                 return true;
             }
         }

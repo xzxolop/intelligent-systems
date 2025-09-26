@@ -1,9 +1,12 @@
+//#define DEBUG_LOG_DISABLED
+
 #include <iostream>
 #include <deque>
 #include <stack>
 #include <chrono>
 
 #include "OperationSequenceFinder.h"
+
 
 class Node {
 public:
@@ -51,6 +54,8 @@ void DFS(Node* root) {
 }
 
 int main() {
+
+
 	/*Node n4{ 5, nullptr, nullptr };
 	Node n3{ 4, nullptr, nullptr };
 	Node n2{ 3, nullptr, nullptr};
