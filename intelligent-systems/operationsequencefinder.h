@@ -18,6 +18,8 @@ class OperationSequenceFinder
         T data;
         unsigned short depth;
 
+        // стоит ли хранить массив операций?
+
         T getData() const noexcept {
             return data;
         }
@@ -49,6 +51,47 @@ class OperationSequenceFinder
 public:
     NodeType* rootPointer;
 
+    class FinderResult {
+        bool _isFind;
+        int _depth;
+        size_t _containerSize;
+        unsigned long long _memoryUsed;
+
+        // char будет экономней ?
+        const char* _isFindString() const {
+            if (_isFind) {
+                return "true";
+            }
+            return "false";
+        }
+
+    public: 
+        FinderResult(int isFind, int depth, size_t contSize) 
+            : _isFind(isFind)
+            , _depth(depth)
+            , _containerSize(contSize)
+            // размер указателя * размер ноды * кол-во
+            , _memoryUsed(8 * sizeof(NodeType) * _containerSize)
+        {}
+
+        bool isFind() const {
+            return _isFind;
+        }
+
+        int getDepth() const {
+            return _depth;
+        }
+
+        unsigned long long getUsedMemory() const {
+            return _memoryUsed;
+        }
+
+        void print() const {
+            std::cout << "isFind: " << _isFindString() << " depth: " << _depth
+                << " containerSize: " << _containerSize << " memoryUsed in byte: " << _memoryUsed <<  std::endl;
+        }
+    };
+
     OperationSequenceFinder() 
         : currentElem{nullptr}
         , rootPointer{nullptr}
@@ -63,7 +106,7 @@ public:
     }
 
     // В ширину
-    int findSequenceBFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
+    FinderResult findSequenceBFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
         this->searchDepth = searchDepth;
@@ -82,19 +125,18 @@ public:
 
         std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
 
-        int deepth = BFSFinder(rootPointer);
+        FinderResult res = BFSFinder(rootPointer);
         clear();
 
-        std::cout << "deq size: " << deq.size() << std::endl;
-        return deepth;
+        return res;
     }
 
-    int BFSFinder(NodeType* node)
+    FinderResult BFSFinder(NodeType* node)
     {
         bool isFind = checkNode(node);
 
         if (isFind) {
-            return 0;
+            return FinderResult{ true, node->depth, deq.size()};
         }
 
         while(!deq.empty()) {
@@ -104,7 +146,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return node->depth;
+                    return FinderResult{ true, node->depth, deq.size() };
                 }
 
                 currentDepth.insert(node->depth + 1);
@@ -119,15 +161,13 @@ public:
 
                 delete node;
             }
-            
         }
 
-        std::cout << "not find" << std::endl;
-        return -1;
+        return FinderResult{ false, node->depth, deq.size() };;
     }
 
     // В глубину
-    int findSequenceDFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
+    FinderResult findSequenceDFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
         this->searchDepth = searchDepth;
@@ -146,20 +186,20 @@ public:
 
         std::cout << "source: " << source << " target: " << target << " size: " << treeSize << std::endl;
 
-        int deepth = DFSFinder(rootPointer);
+        FinderResult res = DFSFinder(rootPointer);
         clear();
 
-        return deepth;
+        return res;
     }
 
-    int DFSFinder(NodeType* node) 
+    FinderResult DFSFinder(NodeType* node) 
     {
         int max = 0;
 
         bool isFind = checkNode(node);
 
         if (isFind) {
-            return 0;
+            FinderResult{ true, node->depth, stack.size() };
         }
 
         while (!stack.empty()) {
@@ -170,7 +210,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return node->depth;
+                    return FinderResult{ true, node->depth, stack.size() };
                 }
                 currentDepth.insert(node->depth + 1);
                 if (setSize != currentDepth.size()) {  
@@ -184,8 +224,7 @@ public:
             }
         }
 
-        std::cout << "not find" << std::endl;
-        return -1;
+        return FinderResult{ false, node->depth, stack.size() };
     }
 
     void createNodeDeq(NodeType* parent, unsigned short depth)
