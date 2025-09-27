@@ -9,8 +9,11 @@
 #include <unordered_set>
 #include <type_traits>
 #include <functional>
+#include <string>
 
 #include "macros.h"
+
+#define OPERATIONS_SEQUENCE_ENABLED
 
 class OperationSequenceFinder
 {
@@ -21,35 +24,35 @@ class OperationSequenceFinder
         T data;
         unsigned short depth;
 
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        Node* prev;
+        char operationNumber;
+#endif
+
         // стоит ли хранить массив операций?
 
         T getData() const noexcept {
             return data;
         }
 
-        Node(T data, unsigned short depth) {
-            this->data = data;
-            this->depth = depth;
-        };
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        Node(T data, unsigned short depth, Node* prev, short opNumb)
+            : data(data)
+            , depth(depth)
+            , prev(prev)
+            , operationNumber(opNumb)
+
+        {};
+#else
+        Node(T data, unsigned short depth)
+            : data(data)
+            , depth(depth)
+        {};
+#endif 
     };
 
     using ValueType = int;
     using NodeType = Node<ValueType>;
-    
-    unsigned short countOperations = 2;
-    unsigned short searchDepth = 0;
-    size_t treeSize;
-
-    std::set<unsigned short> currentDepth;
-    std::unordered_set<ValueType> visitedValues;
-    size_t setSize;
-
-    //using Container = std::deque<NodeType*>;
-    //Container cont;
-
-    // NOTE: на макросах скорость будет чуть больше чем на if. Мб выход из ситуации constexpr if.
-//#define IS_DEQUE(Container) std::is_same_v<Container, std::deque<NodeType*>>
-//#define IS_STACK(Container) std::is_same_v<Container, std::stack<NodeType*>>
 
 public:
     NodeType* rootPointer;
@@ -60,6 +63,9 @@ public:
         size_t _containerSize;
         unsigned long long _memoryUsed;
 
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        std::string operationSequence;
+#endif  
         // char будет экономней ?
         const char* _isFindString() const {
             if (_isFind) {
@@ -69,13 +75,40 @@ public:
         }
 
     public: 
-        FinderResult(int isFind, int depth, size_t contSize) 
+
+        FinderResult(int isFind, NodeType* node, size_t contSize) 
             : _isFind(isFind)
-            , _depth(depth)
+            , _depth(node->depth)
             , _containerSize(contSize)
-            // размер указателя * размер ноды * кол-во
+            // использовано памяти = размер указателя * размер ноды * кол-во
             , _memoryUsed(8 * sizeof(NodeType) * _containerSize)
-        {}
+
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+            , operationSequence("")
+#endif
+
+        {
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+            if (isFind) {
+                std::stack<NodeType*> stack;
+                stack.push(node);
+                while (!stack.empty()) {
+
+                    NodeType* node = stack.top();
+                    stack.pop();
+
+                    //std::cout << "op:" << node->operationNumber;
+                    operationSequence += std::to_string(node->operationNumber);
+                    operationSequence += " ";
+
+                    //rename prev to parent
+                    if (node->prev) {
+                        stack.push(node->prev);
+                    }
+                }
+            }
+#endif
+        }
 
         bool isFind() const {
             return _isFind;
@@ -91,7 +124,8 @@ public:
 
         void print() const {
             std::cout << "isFind: " << _isFindString() << " depth: " << _depth
-                << " containerSize: " << _containerSize << " memoryUsed in byte: " << _memoryUsed <<  std::endl;
+                << " containerSize: " << _containerSize << " memoryUsed in byte: " << _memoryUsed 
+                << " opSeq: " << operationSequence << std::endl;
         }
     };
 
@@ -119,7 +153,11 @@ public:
         this->target = target;
         this->searchDepth = searchDepth;
 
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        NodeType* root = new NodeType(source, 0, nullptr, -1);
+#else
         NodeType* root = new NodeType(source, 0);
+#endif
         deq.push_back(root);
         rootPointer = root;
         currentElem = root;
@@ -144,7 +182,7 @@ public:
         bool isFind = checkNode(node);
 
         if (isFind) {
-            return FinderResult{ true, node->depth, deq.size()};
+            return FinderResult{ true, node, deq.size()};
         }
 
         while(!deq.empty()) {
@@ -154,7 +192,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return FinderResult{ true, node->depth, deq.size() };
+                    return FinderResult{ true, node, deq.size() };
                 }
 
                 currentDepth.insert(node->depth + 1);
@@ -164,14 +202,14 @@ public:
                 }
 
                 if (node->depth + 1 < searchDepth) {
-                    createNodeDeq(node, node->depth + 1);
+                    createNodeDeq(node);
                 }
 
-                delete node;
+                //delete node;
             }
         }
 
-        return FinderResult{ false, node->depth, deq.size() };;
+        return FinderResult{ false, node, deq.size() };;
     }
 
     // В глубину
@@ -180,7 +218,11 @@ public:
         this->target = target;
         this->searchDepth = searchDepth;
 
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        NodeType* root = new NodeType(source, 0, nullptr, -1);
+#else
         NodeType* root = new NodeType(source, 0);
+#endif
         stack.push(root);
         rootPointer = root;
         currentElem = root;
@@ -207,7 +249,7 @@ public:
         bool isFind = checkNode(node);
 
         if (isFind) {
-            FinderResult{ true, node->depth, stack.size() };
+            FinderResult{ true, node, stack.size() };
         }
 
         while (!stack.empty()) {
@@ -218,7 +260,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return FinderResult{ true, node->depth, stack.size() };
+                    return FinderResult{ true, node, stack.size() };
                 }
                 currentDepth.insert(node->depth + 1);
                 if (setSize != currentDepth.size()) {  
@@ -232,18 +274,31 @@ public:
             }
         }
 
-        return FinderResult{ false, node->depth, stack.size() };
+        return FinderResult{ false, node, stack.size() };
     }
 
-    void createNodeDeq(NodeType* parent, unsigned short depth)
+    void createNodeDeq(NodeType* parent)
     {
         if (!parent) {
             return;
         }
 
-        for (auto x : _operations) {
+        for (short i = 0; i < _operations.size(); i++) {
+            
+            auto func = _operations.at(i);
+            ValueType value = func(parent->data);
+            if (visitedValues.find(value) == visitedValues.end()) {
+                visitedValues.insert(value);
 
-            createNodeIfNotVisitedDeq(x(parent->data), depth);
+                unsigned short newDepth = parent->depth + 1;
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+                NodeType* node = new NodeType{ value, newDepth, parent, i };
+                
+#else
+                NodeType* node = new NodeType{ value, newDepth};
+#endif
+                deq.push_back(node);
+            }
         }
     }
 
@@ -252,28 +307,21 @@ public:
             return;
         }
 
-        ValueType newValue = parent->data + 3;
-        createNodeIfNotVisitedStack(newValue, depth);
+        for (short i = 0; i < _operations.size(); i++) {
 
-        newValue = parent->data * 2;
-        createNodeIfNotVisitedStack(newValue, depth);
-    }
-
-    // NOTE: добавить флаг в каком контейнере мы работаем и куда добавлять эл-ты.
-    void createNodeIfNotVisitedDeq(const ValueType value, const unsigned short depth) {
-        if (visitedValues.find(value) == visitedValues.end()) {
-            visitedValues.insert(value);
-            NodeType* node = new NodeType{ value, depth };
-            deq.push_back(node);
-        }
-    }
-
-    void createNodeIfNotVisitedStack(const ValueType value, const unsigned short depth) {
-        if (visitedValues.find(value) == visitedValues.end()) {
-            visitedValues.insert(value);
-            DEBUG_LOG(value);
-            NodeType* node = new NodeType{ value, depth };
-            stack.push(node);
+            auto func = _operations.at(i);
+            ValueType value = func(parent->data);
+            if (visitedValues.find(value) == visitedValues.end()) {
+                visitedValues.insert(value);
+                DEBUG_LOG(value);
+                unsigned short newDepth = parent->depth + 1;
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+                NodeType* node = new NodeType{ value, newDepth, parent, i };
+#else
+                NodeType* node = new NodeType{ value, newDepth };
+#endif
+                stack.push(node);
+            }
         }
     }
 
@@ -332,8 +380,16 @@ public:
     }
 
 private:
+    unsigned short countOperations = 2;
+    unsigned short searchDepth = 0;
+    size_t treeSize;
+    size_t setSize;
+    
+    std::set<unsigned short> currentDepth;
+    std::unordered_set<ValueType> visitedValues;
     std::vector<std::function<int(int)>> _operations;
 
+    // Без указателя будет переполнение стека?
     std::deque<NodeType*> deq;
     std::stack<NodeType*> stack;
 

@@ -1,4 +1,5 @@
 //#define DEBUG_LOG_DISABLED
+//#define OPERATIONS_SEQUENCE_ENABLED
 
 #include <iostream>
 #include <deque>
@@ -76,7 +77,7 @@ int f2(int a) {
 	return a + 3;
 }
 int f3(int a) {
-	return a * 1000;
+	return a * 10;
 }
 
 void OperationSequenceFinderTest() 
@@ -119,8 +120,8 @@ void OperationSequenceFinderTest()
 	std::cout << "deep: " << deep << std::endl << std::endl;;*/
 }
 
-int main() {
-
+int main() 
+{
 	OperationSequenceFinderTest();
 
 
