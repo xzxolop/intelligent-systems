@@ -62,6 +62,7 @@ public:
         int _depth;
         size_t _containerSize;
         unsigned long long _memoryUsed;
+        std::vector<std::pair<std::string, std::function<int(int)>>> _operations;
 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
         std::string operationSequence;
@@ -76,7 +77,8 @@ public:
 
     public: 
 
-        FinderResult(int isFind, NodeType* node, size_t contSize) 
+        FinderResult(int isFind, NodeType* node, size_t contSize, 
+            const std::vector<std::pair<std::string, std::function<int(int)>>>& operations)
             : _isFind(isFind)
             , _depth(node->depth)
             , _containerSize(contSize)
@@ -85,21 +87,23 @@ public:
 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
             , operationSequence("")
+            , _operations(operations)
 #endif
-
         {
 #ifdef OPERATIONS_SEQUENCE_ENABLED
             if (isFind) {
                 std::stack<NodeType*> stack;
                 stack.push(node);
                 while (!stack.empty()) {
-
                     NodeType* node = stack.top();
                     stack.pop();
 
-                    //std::cout << "op:" << node->operationNumber;
-                    operationSequence += std::to_string(node->operationNumber);
-                    operationSequence += " ";
+                    int opNumb = node->operationNumber;
+                    if (opNumb >= 0 && opNumb < _operations.size()) {
+                        std::string operation = _operations.at(opNumb).first;
+                        operationSequence += operation += " ";
+                        operationSequence += " ";
+                    }
 
                     //rename prev to parent
                     if (node->prev) {
@@ -125,7 +129,10 @@ public:
         void print() const {
             std::cout << "isFind: " << _isFindString() << " depth: " << _depth
                 << " containerSize: " << _containerSize << " memoryUsed in byte: " << _memoryUsed 
-                << " opSeq: " << operationSequence << std::endl;
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+                << " opSeq: " << operationSequence 
+#endif
+                << std::endl;
         }
     };
 
@@ -142,7 +149,7 @@ public:
         clear();
     }
 
-    void setOperations(const std::vector<std::function<int(int)>>& operations) 
+    void setOperations(const std::vector<std::pair<std::string, std::function<int(int)>>>& operations)
     {
         _operations = operations;
     };
@@ -182,7 +189,7 @@ public:
         bool isFind = checkNode(node);
 
         if (isFind) {
-            return FinderResult{ true, node, deq.size()};
+            return FinderResult{ true, node, deq.size() , _operations };
         }
 
         while(!deq.empty()) {
@@ -192,7 +199,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return FinderResult{ true, node, deq.size() };
+                    return FinderResult{ true, node, deq.size(), _operations };
                 }
 
                 currentDepth.insert(node->depth + 1);
@@ -209,7 +216,7 @@ public:
             }
         }
 
-        return FinderResult{ false, node, deq.size() };;
+        return FinderResult{ false, node, deq.size(), _operations };;
     }
 
     // В глубину
@@ -249,7 +256,7 @@ public:
         bool isFind = checkNode(node);
 
         if (isFind) {
-            FinderResult{ true, node, stack.size() };
+            FinderResult{ true, node, stack.size() , _operations };
         }
 
         while (!stack.empty()) {
@@ -260,7 +267,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return FinderResult{ true, node, stack.size() };
+                    return FinderResult{ true, node, stack.size(), _operations };
                 }
                 currentDepth.insert(node->depth + 1);
                 if (setSize != currentDepth.size()) {  
@@ -274,7 +281,7 @@ public:
             }
         }
 
-        return FinderResult{ false, node, stack.size() };
+        return FinderResult{ false, node, stack.size(), _operations };
     }
 
     void createNodeDeq(NodeType* parent)
@@ -283,16 +290,16 @@ public:
             return;
         }
 
+
         for (short i = 0; i < _operations.size(); i++) {
-            
-            auto func = _operations.at(i);
+            auto func = _operations.at(i).second;
             ValueType value = func(parent->data);
             if (visitedValues.find(value) == visitedValues.end()) {
                 visitedValues.insert(value);
 
                 unsigned short newDepth = parent->depth + 1;
 #ifdef OPERATIONS_SEQUENCE_ENABLED
-                NodeType* node = new NodeType{ value, newDepth, parent, i };
+                NodeType* node = new NodeType{ value, newDepth, parent, i};
                 
 #else
                 NodeType* node = new NodeType{ value, newDepth};
@@ -309,7 +316,7 @@ public:
 
         for (short i = 0; i < _operations.size(); i++) {
 
-            auto func = _operations.at(i);
+            auto func = _operations.at(i).second;
             ValueType value = func(parent->data);
             if (visitedValues.find(value) == visitedValues.end()) {
                 visitedValues.insert(value);
@@ -387,7 +394,7 @@ private:
     
     std::set<unsigned short> currentDepth;
     std::unordered_set<ValueType> visitedValues;
-    std::vector<std::function<int(int)>> _operations;
+    std::vector<std::pair<std::string, std::function<int(int)>>> _operations;
 
     // Без указателя будет переполнение стека?
     std::deque<NodeType*> deq;

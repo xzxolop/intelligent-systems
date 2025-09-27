@@ -5,6 +5,7 @@
 #include <deque>
 #include <stack>
 #include <chrono>
+#include <unordered_map>
 
 #include "OperationSequenceFinder.h"
 
@@ -84,10 +85,12 @@ void OperationSequenceFinderTest()
 {
 	OperationSequenceFinder finder{};
 
-	std::vector<std::function<int(int)>> operations;
-	operations.push_back(f1);
-	operations.push_back(f2);
-	operations.push_back(f3);
+	// map vs hash ?
+	std::vector<std::pair<std::string, std::function<int(int)>>> operations;
+
+	operations.push_back({ "*2", f1 });
+	operations.push_back({ "+3", f2 });
+	operations.push_back({ "*10", f3 });
 
 	finder.setOperations(operations);
 
@@ -99,7 +102,7 @@ void OperationSequenceFinderTest()
 
 
 	start = std::chrono::high_resolution_clock::now();
-	auto res = finder.findSequenceBFS(1, 1000000, 10);
+	auto res = finder.findSequenceBFS(1, 100003, 10);
 	res.print();
 	end = std::chrono::high_resolution_clock::now();
 	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;
