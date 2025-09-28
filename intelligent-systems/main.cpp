@@ -1,4 +1,4 @@
-#define DEBUG_LOG_ENABLED
+
 
 #include <iostream>
 #include <deque>
@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "OperationSequenceFinder.h"
+#include "macros.h"
 
 
 class Node {
@@ -80,8 +81,23 @@ int f3(int a) {
 	return a * 10;
 }
 
+int f1_reverse(int a) {
+	return a / 2;
+}
+
+int f2_reverse(int a) {
+	return a - 3;
+}
+
+int f3_reverse(int a) {
+	return a / 10;
+}
+
 void OperationSequenceFinderTest() 
 {
+//#define DEBUG_LOG_ENABLED
+
+
 	OperationSequenceFinder finder{};
 
 	// map vs hash ?
@@ -93,33 +109,12 @@ void OperationSequenceFinderTest()
 
 	finder.setOperations(operations);
 
-	auto start = std::chrono::high_resolution_clock::now();
-	//auto res = finder.findSequenceDFS(2, 100, 20);
-	//res.print();
-	auto end = std::chrono::high_resolution_clock::now();
-	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 100, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 2, 55, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 2, 100, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 97, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 2, 1000, 20);
 
-
-	start = std::chrono::high_resolution_clock::now();
-	auto res = finder.findSequenceBFS(1, 10000001, 31);
-	res.print();
-	end = std::chrono::high_resolution_clock::now();
-	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;
-
-	/*deep = finder.findSequence(2, 55);
-	std::cout << "deep: " << deep << std::endl << std::endl;;
-
-	deep = finder.findSequence(2, 100);
-	std::cout << "deep: " << deep << std::endl << std::endl;;
-
-	deep = finder.findSequence(1, 97);
-	std::cout << "deep: " << deep << std::endl << std::endl;;
-
-	deep = finder.findSequence(2, 1000);
-	std::cout << "deep: " << deep << std::endl << std::endl;;
-
-	deep = finder.findSequence(2, 10000001, 32);
-	std::cout << "deep: " << deep << std::endl << std::endl;;*/
 }
 
 int main() 

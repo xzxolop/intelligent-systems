@@ -20,12 +20,14 @@ class OperationSequenceFinder
     template<typename T>
     class Node;
 
+public:
     using OperationsNumberType = short;
     using TreeDepthType = unsigned short;
 
 
     using ValueType = int;
     using NodeType = Node<ValueType>;
+private:
 
     // NOTE: move to different file ?
     template<typename T>
@@ -65,6 +67,8 @@ public:
     NodeType* rootPointer;
 
     class FinderResult {
+        ValueType _source;
+        ValueType _target;
         bool _isFind;
         TreeDepthType _depth;
         size_t _containerSize;
@@ -83,9 +87,11 @@ public:
         }
 
     public: 
-        FinderResult(int isFind, NodeType* node, size_t contSize, 
+        FinderResult(ValueType source, ValueType target, int isFind, NodeType* node, size_t contSize, 
             const std::vector<std::pair<std::string, std::function<int(int)>>>& operations)
-            : _isFind(isFind)
+            : _source(source)
+            , _target(target)
+            , _isFind(isFind)
             , _depth(node->depth)
             , _containerSize(contSize)
             // использовано памяти = размер указателя * размер ноды * кол-во
@@ -133,7 +139,7 @@ public:
         }
 
         void print() const {
-            std::cout << "isFind: " << _isFindString() << " depth: " << _depth
+            std::cout << "source: " << _source << " target: " << _target << " isFind: " << _isFindString() << " depth: " << _depth
                 << " containerSize: " << _containerSize << " memoryUsed in byte: " << _memoryUsed 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
                 << " opSeq: " << operationSequence 
@@ -195,7 +201,7 @@ public:
         bool isFind = checkNode(node);
 
         if (isFind) {
-            return FinderResult{ true, node, deq.size() , _operations };
+            return FinderResult{ source, target, true, node, deq.size() , _operations };
         }
 
         while(!deq.empty()) {
@@ -205,7 +211,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return FinderResult{ true, node, deq.size(), _operations };
+                    return FinderResult{ source, target, true, node, deq.size(), _operations };
                 }
 
                 currentDepth.insert(node->depth);
@@ -222,7 +228,7 @@ public:
             }
         }
 
-        return FinderResult{ false, node, deq.size(), _operations };;
+        return FinderResult{ source, target, false, node, deq.size(), _operations };;
     }
 
     void createNodeDeq(NodeType* parent)
@@ -249,11 +255,6 @@ public:
             }
         }
     }
-
-
-
-
-
 
     // В глубину
     FinderResult findSequenceDFS(ValueType source, ValueType target, TreeDepthType searchDepth = 20) {
@@ -292,7 +293,7 @@ public:
         bool isFind = checkNode(node);
 
         if (isFind) {
-            return FinderResult{ true, node, stack.size() , _operations };
+            return FinderResult{ source, target, true, node, stack.size() , _operations };
         }
 
         while (!stack.empty()) {
@@ -303,7 +304,7 @@ public:
                 isFind = checkNode(node);
 
                 if (isFind) {
-                    return FinderResult{ true, node, stack.size(), _operations };
+                    return FinderResult{ source, target, true, node, stack.size(), _operations };
                 }
                 currentDepth.insert(node->depth);
                 if (setSize != currentDepth.size()) {
@@ -317,7 +318,7 @@ public:
             }
         }
 
-        return FinderResult{ false, node, stack.size(), _operations };
+        return FinderResult{ source, target, false, node, stack.size(), _operations };
     }
 
     void createNodeStack(NodeType* parent, TreeDepthType depth) {
