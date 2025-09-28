@@ -337,35 +337,6 @@ public:
         else return false;
     }
 
-    bool checkLastTwoNodes()
-    {
-        auto lastNodes = getLastNodes();
-        for (int i = 0; i < lastNodes.size(); i++) {
-            auto node = lastNodes.at(i);
-            if (lastNodes.at(i)->data == target) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    std::vector<NodeType*> getLastNodes() {
-        std::vector<NodeType*> vec;
-       
-
-        if (deq.size() >= 2) {
-            for (int i = deq.size() - countOperations - 1; i < deq.size(); i++) {
-                vec.push_back(deq[i]);
-            }
-        }
-
-        if (deq.size() == 1) {
-            vec.push_back(deq[0]);
-        }
-        return vec;
-    }
-
     void clear() {
         for (NodeType* ptr : deq) {
             delete ptr;
