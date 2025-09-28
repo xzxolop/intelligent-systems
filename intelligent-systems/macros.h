@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#ifndef DEBUG_LOG_DISABLED
+#ifdef DEBUG_LOG_ENABLED
 #define DEBUG_LOG(args) \
     do { \
         std::cout << args << std::endl; \

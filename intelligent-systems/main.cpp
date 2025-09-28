@@ -1,5 +1,4 @@
-//#define DEBUG_LOG_DISABLED
-//#define OPERATIONS_SEQUENCE_ENABLED
+#define DEBUG_LOG_ENABLED
 
 #include <iostream>
 #include <deque>
@@ -90,7 +89,7 @@ void OperationSequenceFinderTest()
 
 	operations.push_back({ "*2", f1 });
 	operations.push_back({ "+3", f2 });
-	operations.push_back({ "*10", f3 });
+	//operations.push_back({ "*10", f3 });
 
 	finder.setOperations(operations);
 
@@ -102,7 +101,7 @@ void OperationSequenceFinderTest()
 
 
 	start = std::chrono::high_resolution_clock::now();
-	auto res = finder.findSequenceBFS(1, 100003, 10);
+	auto res = finder.findSequenceBFS(1, 10000001, 31);
 	res.print();
 	end = std::chrono::high_resolution_clock::now();
 	std::cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << " milisec" << std::endl;

@@ -256,7 +256,7 @@ public:
         bool isFind = checkNode(node);
 
         if (isFind) {
-            FinderResult{ true, node, stack.size() , _operations };
+            return FinderResult{ true, node, stack.size() , _operations };
         }
 
         while (!stack.empty()) {
