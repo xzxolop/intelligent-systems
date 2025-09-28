@@ -25,7 +25,7 @@ class OperationSequenceFinder
         unsigned short depth;
 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
-        Node* prev;
+        Node* parent;
         char operationNumber;
 #endif
 
@@ -36,10 +36,10 @@ class OperationSequenceFinder
         }
 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
-        Node(T data, unsigned short depth, Node* prev, short opNumb)
+        Node(T data, unsigned short depth, Node* parent, short opNumb)
             : data(data)
             , depth(depth)
-            , prev(prev)
+            , parent(parent)
             , operationNumber(opNumb)
 
         {};
@@ -105,9 +105,9 @@ public:
                         operationSequence += " ";
                     }
 
-                    //rename prev to parent
-                    if (node->prev) {
-                        stack.push(node->prev);
+                    //rename parent to parent
+                    if (node->parent) {
+                        stack.push(node->parent);
                     }
                 }
             }
