@@ -13,7 +13,7 @@
 
 #include "macros.h"
 
-#define OPERATIONS_SEQUENCE_ENABLED
+//#define OPERATIONS_SEQUENCE_ENABLED
 
 class OperationSequenceFinder
 {
@@ -30,7 +30,6 @@ class OperationSequenceFinder
 #endif
 
         // стоит ли хранить массив операций?
-
         T getData() const noexcept {
             return data;
         }
@@ -76,7 +75,6 @@ public:
         }
 
     public: 
-
         FinderResult(int isFind, NodeType* node, size_t contSize, 
             const std::vector<std::pair<std::string, std::function<int(int)>>>& operations)
             : _isFind(isFind)
@@ -202,9 +200,9 @@ public:
                     return FinderResult{ true, node, deq.size(), _operations };
                 }
 
-                currentDepth.insert(node->depth + 1);
+                currentDepth.insert(node->depth);
                 if (setSize != currentDepth.size()) {
-                    DEBUG_LOG("Depth is " << currentDepth.size() << ", deque size: " << deq.size() << "; ");
+                    DEBUG_LOG("Depth is " << currentDepth.size() -1 << ", deque size: " << deq.size() << "; ");
                     setSize = currentDepth.size();
                 }
 
@@ -269,7 +267,7 @@ public:
                 if (isFind) {
                     return FinderResult{ true, node, stack.size(), _operations };
                 }
-                currentDepth.insert(node->depth + 1);
+                currentDepth.insert(node->depth);
                 if (setSize != currentDepth.size()) {  
                     setSize = currentDepth.size();
                 }
