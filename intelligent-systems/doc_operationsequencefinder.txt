@@ -1,4 +1,4 @@
-п»ї#pragma once
+#pragma once
 
 #include <deque>
 #include <iostream>
@@ -20,10 +20,7 @@ class OperationSequenceFinder
     template<typename T>
     class Node;
 
-    using OperationsNumberType = short;
-    using TreeDepthType = unsigned short;
-
-
+    using OperationsNumberType = char;
     using ValueType = int;
     using NodeType = Node<ValueType>;
 
@@ -33,20 +30,20 @@ class OperationSequenceFinder
 
     public:
         T data;
-        TreeDepthType depth;
+        unsigned short depth;
 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
         Node* parent;
         OperationsNumberType operationNumber;
 #endif
 
-        // СЃС‚РѕРёС‚ Р»Рё С…СЂР°РЅРёС‚СЊ РјР°СЃСЃРёРІ РѕРїРµСЂР°С†РёР№?
+        // стоит ли хранить массив операций?
         T getData() const noexcept {
             return data;
         }
 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
-        Node(T data, TreeDepthType depth, Node* parent, OperationsNumberType opNumb)
+        Node(T data, unsigned short depth, Node* parent, short opNumb)
             : data(data)
             , depth(depth)
             , parent(parent)
@@ -54,7 +51,7 @@ class OperationSequenceFinder
 
         {};
 #else
-        Node(T data, TreeDepthType depth)
+        Node(T data, unsigned short depth)
             : data(data)
             , depth(depth)
         {};
@@ -66,7 +63,7 @@ public:
 
     class FinderResult {
         bool _isFind;
-        TreeDepthType _depth;
+        int _depth;
         size_t _containerSize;
         unsigned long long _memoryUsed;
         std::vector<std::pair<std::string, std::function<int(int)>>> _operations;
@@ -74,7 +71,7 @@ public:
 #ifdef OPERATIONS_SEQUENCE_ENABLED
         std::string operationSequence;
 #endif  
-        // char Р±СѓРґРµС‚ СЌРєРѕРЅРѕРјРЅРµР№ ?
+        // char будет экономней ?
         const char* _isFindString() const {
             if (_isFind) {
                 return "true";
@@ -88,7 +85,7 @@ public:
             : _isFind(isFind)
             , _depth(node->depth)
             , _containerSize(contSize)
-            // РёСЃРїРѕР»СЊР·РѕРІР°РЅРѕ РїР°РјСЏС‚Рё = СЂР°Р·РјРµСЂ СѓРєР°Р·Р°С‚РµР»СЏ * СЂР°Р·РјРµСЂ РЅРѕРґС‹ * РєРѕР»-РІРѕ
+            // использовано памяти = размер указателя * размер ноды * кол-во
             , _memoryUsed(8 * sizeof(NodeType) * _containerSize)
 
 #ifdef OPERATIONS_SEQUENCE_ENABLED
@@ -124,7 +121,7 @@ public:
             return _isFind;
         }
 
-        TreeDepthType getDepth() const {
+        int getDepth() const {
             return _depth;
         }
 
@@ -160,8 +157,8 @@ public:
         _operations = operations;
     };
 
-    // Р’ С€РёСЂРёРЅСѓ
-    FinderResult findSequenceBFS(ValueType source, ValueType target, TreeDepthType searchDepth = 20) {
+    // В ширину
+    FinderResult findSequenceBFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
         this->searchDepth = searchDepth;
@@ -232,13 +229,13 @@ public:
         }
 
 
-        for (OperationsNumberType i = 0; i < _operations.size(); i++) {
+        for (short i = 0; i < _operations.size(); i++) {
             auto func = _operations.at(i).second;
             ValueType value = func(parent->data);
             if (visitedValues.find(value) == visitedValues.end()) {
                 visitedValues.insert(value);
 
-                TreeDepthType newDepth = parent->depth + 1;
+                unsigned short newDepth = parent->depth + 1;
 #ifdef OPERATIONS_SEQUENCE_ENABLED
                 NodeType* node = new NodeType{ value, newDepth, parent, i};
                 
@@ -255,8 +252,8 @@ public:
 
 
 
-    // Р’ РіР»СѓР±РёРЅСѓ
-    FinderResult findSequenceDFS(ValueType source, ValueType target, TreeDepthType searchDepth = 20) {
+    // В глубину
+    FinderResult findSequenceDFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
         this->target = target;
         this->searchDepth = searchDepth;
@@ -320,19 +317,19 @@ public:
         return FinderResult{ false, node, stack.size(), _operations };
     }
 
-    void createNodeStack(NodeType* parent, TreeDepthType depth) {
+    void createNodeStack(NodeType* parent, unsigned short depth) {
         if (!parent) {
             return;
         }
 
-        for (OperationsNumberType i = 0; i < _operations.size(); i++) {
+        for (short i = 0; i < _operations.size(); i++) {
 
             auto func = _operations.at(i).second;
             ValueType value = func(parent->data);
             if (visitedValues.find(value) == visitedValues.end()) {
                 visitedValues.insert(value);
                 DEBUG_LOG(value);
-                TreeDepthType newDepth = parent->depth + 1;
+                unsigned short newDepth = parent->depth + 1;
 #ifdef OPERATIONS_SEQUENCE_ENABLED
                 NodeType* node = new NodeType{ value, newDepth, parent, i };
 #else
@@ -370,15 +367,15 @@ public:
 
 private:
     unsigned short countOperations = 2;
-    TreeDepthType searchDepth = 0;
+    unsigned short searchDepth = 0;
     size_t treeSize;
     size_t setSize;
     
-    std::set<TreeDepthType> currentDepth;
+    std::set<unsigned short> currentDepth;
     std::unordered_set<ValueType> visitedValues;
     std::vector<std::pair<std::string, std::function<int(int)>>> _operations;
 
-    // Р‘РµР· СѓРєР°Р·Р°С‚РµР»СЏ Р±СѓРґРµС‚ РїРµСЂРµРїРѕР»РЅРµРЅРёРµ СЃС‚РµРєР°?
+    // Без указателя будет переполнение стека?
     std::deque<NodeType*> deq;
     std::stack<NodeType*> stack;
 
