@@ -217,6 +217,31 @@ public:
         return FinderResult{ false, node, deq.size(), _operations };;
     }
 
+    void createNodeDeq(NodeType* parent)
+    {
+        if (!parent) {
+            return;
+        }
+
+
+        for (short i = 0; i < _operations.size(); i++) {
+            auto func = _operations.at(i).second;
+            ValueType value = func(parent->data);
+            if (visitedValues.find(value) == visitedValues.end()) {
+                visitedValues.insert(value);
+
+                unsigned short newDepth = parent->depth + 1;
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+                NodeType* node = new NodeType{ value, newDepth, parent, i};
+                
+#else
+                NodeType* node = new NodeType{ value, newDepth};
+#endif
+                deq.push_back(node);
+            }
+        }
+    }
+
     // В глубину
     FinderResult findSequenceDFS(ValueType source, ValueType target, unsigned short searchDepth = 20) {
         this->source = source;
@@ -247,7 +272,7 @@ public:
         return res;
     }
 
-    FinderResult DFSFinder(NodeType* node) 
+    FinderResult DFSFinder(NodeType* node)
     {
         int max = 0;
 
@@ -268,7 +293,7 @@ public:
                     return FinderResult{ true, node, stack.size(), _operations };
                 }
                 currentDepth.insert(node->depth);
-                if (setSize != currentDepth.size()) {  
+                if (setSize != currentDepth.size()) {
                     setSize = currentDepth.size();
                 }
 
@@ -280,31 +305,6 @@ public:
         }
 
         return FinderResult{ false, node, stack.size(), _operations };
-    }
-
-    void createNodeDeq(NodeType* parent)
-    {
-        if (!parent) {
-            return;
-        }
-
-
-        for (short i = 0; i < _operations.size(); i++) {
-            auto func = _operations.at(i).second;
-            ValueType value = func(parent->data);
-            if (visitedValues.find(value) == visitedValues.end()) {
-                visitedValues.insert(value);
-
-                unsigned short newDepth = parent->depth + 1;
-#ifdef OPERATIONS_SEQUENCE_ENABLED
-                NodeType* node = new NodeType{ value, newDepth, parent, i};
-                
-#else
-                NodeType* node = new NodeType{ value, newDepth};
-#endif
-                deq.push_back(node);
-            }
-        }
     }
 
     void createNodeStack(NodeType* parent, unsigned short depth) {
