@@ -90,7 +90,7 @@ public:
             : _source(source)
             , _target(target)
             , _isFind(isFind)
-            , _depth(node->depth)
+            , _depth(0)
             , _containerSize(contSize)
             // использовано памяти = размер указателя * размер ноды * кол-во
             , _memoryUsed(8 * sizeof(NodeType) * _containerSize)
@@ -101,6 +101,10 @@ public:
 #endif
         {
 #ifdef OPERATIONS_SEQUENCE_ENABLED
+            if (node) {
+                _depth = node->depth;
+            }
+
             if (isFind) {
                 std::stack<NodeType*> stack;
                 stack.push(node);
@@ -161,7 +165,92 @@ public:
     void setOperations(const std::vector<std::pair<std::string, std::function<int(int)>>>& operations)
     {
         _operations = operations;
-    };
+    }
+
+    void setReverseOperators(const std::vector<std::pair<std::string, std::function<int(int)>>>& reverseOperations) 
+    {
+        _reverseOperations = reverseOperations;
+    }
+
+    // TODO: Эта функция создает мешанину. По-хорошему нужно вынести в отдельный класс отнаслед. от этого.
+    FinderResult findSequenceBidir(ValueType source, ValueType target, TreeDepthType searchDepth = 20) 
+    {
+        if (!_reverseOperations.size()) {
+            std::cout << "Reverse operations is not defined. Please call setReverseOperators method!" << std::endl;
+            return FinderResult{ source, target, false, nullptr, deq.size() , _operations };
+        }
+
+        this->source = source;
+        this->target = target;
+        this->searchDepth = searchDepth;
+
+        
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        // создаем source
+        NodeType* sourceRoot = new NodeType(source, 0, nullptr, -1);
+        
+        // создаем target
+        NodeType* targetRoot = new NodeType(target, 0, nullptr, -1);
+#else
+        NodeType* root = new NodeType(source, 0);
+        NodeType* targetRoot = new NodeType(target, 0);
+#endif
+
+        deq.push_back(sourceRoot);
+        reverseDeq.push_back(targetRoot);
+
+        if (countOperations < 2) {
+            treeSize = searchDepth;
+        }
+        else {
+            treeSize = pow(countOperations, searchDepth);
+        }
+
+        DEBUG_LOG("source: " << source << " target: " << target << " max tree size: " << treeSize);
+
+        FinderResult res = BFSFinder(sourceRoot);
+        clear();
+
+        return res;
+
+    }
+
+    FinderResult bidirFinder(NodeType* sourceNode, NodeType* targetNode) {
+
+
+        bool isFind = checkNode(sourceNode);
+
+        if (isFind) {
+            return FinderResult{ source, target, true, node, deq.size() , _operations };
+        }
+
+        while (!deq.empty()) {
+            NodeType* node = deq.front();
+            deq.pop_front();
+            if (node) {
+                isFind = checkNode(node);
+
+                if (isFind) {
+                    return FinderResult{ source, target, true, node, deq.size(), _operations };
+                }
+
+                currentDepth.insert(node->depth);
+                if (setSize != currentDepth.size()) {
+                    DEBUG_LOG("Depth is " << currentDepth.size() - 1 << ", deque size: " << deq.size() << "; ");
+                    setSize = currentDepth.size();
+                }
+
+                if (node->depth + 1 < searchDepth) {
+                    createNodeDeq(node);
+                }
+
+                //delete node;
+            }
+        }
+
+        return FinderResult{ source, target, false, node, deq.size(), _operations };;
+
+    }
 
     // В ширину
     FinderResult findSequenceBFS(ValueType source, ValueType target, TreeDepthType searchDepth = 20) {
@@ -183,7 +272,7 @@ public:
             treeSize = pow(countOperations, searchDepth);
         }
 
-        DEBUG_LOG("source: " << source << " target: " << target << " size: " << treeSize);
+        DEBUG_LOG("source: " << source << " target: " << target << " max tree size: " << treeSize);
 
         FinderResult res = BFSFinder(root);
         clear();
@@ -271,7 +360,7 @@ public:
             treeSize = pow(countOperations, searchDepth);
         }
 
-        DEBUG_LOG("source: " << source << " target: " << target << " size: " << treeSize);
+        DEBUG_LOG("source: " << source << " target: " << target << " max tree size: " << treeSize);
 
         FinderResult res = DFSFinder(root);
         clear();

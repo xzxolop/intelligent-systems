@@ -131,6 +131,9 @@ void OperationSequenceFinderTest()
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 97, 1, 20);
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1000, 2, 20);
 
+
+	finder.findSequenceBidir(100, 1, 20);
+
 }
 
 int main() 
