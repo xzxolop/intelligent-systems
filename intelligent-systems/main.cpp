@@ -109,6 +109,7 @@ void OperationSequenceFinderTest()
 
 	finder.setOperations(operations);
 
+	//FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 10090, 20);
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 100, 20);
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 2, 55, 20);
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 2, 100, 20);

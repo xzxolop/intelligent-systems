@@ -106,6 +106,12 @@ public:
             if (isFind) {
                 std::stack<NodeType*> stack;
                 stack.push(node);
+
+                while (stack.top()->parent != nullptr) {
+                    NodeType* node = stack.top();
+                    stack.push(node->parent);
+                }
+
                 while (!stack.empty()) {
                     NodeType* node = stack.top();
                     stack.pop();
@@ -115,11 +121,6 @@ public:
                         std::string operation = _operations.at(opNumb).first;
                         operationSequence += operation += " ";
                         operationSequence += " ";
-                    }
-
-                    //rename parent to parent
-                    if (node->parent) {
-                        stack.push(node->parent);
                     }
                 }
             }
