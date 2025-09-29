@@ -1,4 +1,4 @@
-
+﻿
 
 #include <iostream>
 #include <deque>
@@ -100,7 +100,7 @@ void OperationSequenceFinderTest()
 
 	OperationSequenceFinder finder{};
 
-	// map vs hash ?
+	// map vs hash Для больших и маленьких значений ?
 	std::vector<std::pair<std::string, std::function<int(int)>>> operations;
 
 	operations.push_back({ "*2", f1 });
@@ -114,6 +114,21 @@ void OperationSequenceFinderTest()
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 2, 100, 20);
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 97, 20);
 	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 2, 1000, 20);
+
+	std::vector<std::pair<std::string, std::function<int(int)>>> reverseOperations;
+	reverseOperations.push_back({ ":2", f1_reverse });
+	reverseOperations.push_back({ "-3", f2_reverse });
+	finder.setOperations(reverseOperations);
+
+	std::cout << std::endl;
+	std::cout << "reverse" << std::endl;
+	std::cout << std::endl;
+
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 100, 1, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 55, 2, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 100, 2, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 97, 1, 20);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1000, 2, 20);
 
 }
 
