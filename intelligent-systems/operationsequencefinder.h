@@ -64,8 +64,6 @@ private:
     };
 
 public:
-    NodeType* rootPointer;
-
     class FinderResult {
         ValueType _source;
         ValueType _target;
@@ -150,9 +148,7 @@ public:
     };
 
     OperationSequenceFinder() 
-        : currentElem{nullptr}
-        , rootPointer{nullptr}
-        , source{0}
+        : source{0}
         , target{0}
         , treeSize{0}
         , setSize{ currentDepth.size() }
@@ -179,8 +175,6 @@ public:
         NodeType* root = new NodeType(source, 0);
 #endif
         deq.push_back(root);
-        rootPointer = root;
-        currentElem = root;
 
         if (countOperations < 2) {
             treeSize = searchDepth;
@@ -191,7 +185,7 @@ public:
 
         DEBUG_LOG("source: " << source << " target: " << target << " size: " << treeSize);
 
-        FinderResult res = BFSFinder(rootPointer);
+        FinderResult res = BFSFinder(root);
         clear();
 
         return res;
@@ -269,8 +263,6 @@ public:
         NodeType* root = new NodeType(source, 0);
 #endif
         stack.push(root);
-        rootPointer = root;
-        currentElem = root;
 
         if (countOperations < 2) {
             treeSize = searchDepth;
@@ -281,7 +273,7 @@ public:
 
         DEBUG_LOG("source: " << source << " target: " << target << " size: " << treeSize);
 
-        FinderResult res = DFSFinder(rootPointer);
+        FinderResult res = DFSFinder(root);
         clear();
 
         return res;
@@ -357,7 +349,12 @@ public:
             delete ptr;
         }
         deq.clear();
-        
+
+        // TODO: вынести в другой класс
+        for (NodeType* ptr : reverseDeq) {
+            delete ptr;
+        }
+        reverseDeq.clear();
 
         while (!stack.empty()) {
             NodeType* ptr = stack.top();
@@ -379,14 +376,16 @@ private:
     std::set<TreeDepthType> currentDepth;
     std::unordered_set<ValueType> visitedValues;
     std::vector<std::pair<std::string, std::function<int(int)>>> _operations;
+    std::vector<std::pair<std::string, std::function<int(int)>>> _reverseOperations;
 
     // Без указателя будет переполнение стека?
     std::deque<NodeType*> deq;
     std::stack<NodeType*> stack;
 
+    // TODO: вынести в другой класс
+    std::deque<NodeType*> reverseDeq;
+
     ValueType source;
     ValueType target;
-
-    NodeType* currentElem;
 };
 
