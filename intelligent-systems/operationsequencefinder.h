@@ -231,8 +231,13 @@ public:
       
             int sz = deq.size();
             for (int i = 0; i < sz; i++) {
+                
                 if (checkInReverseVisited(deq.at(i)->data)) {
                     DEBUG_LOG("checkInReverseVisited: " + std::to_string( deq.at(i)->data));
+
+                    
+                    auto it = visitedValues.find(deq.at(i)->data);
+                    mergeTrees(deq.at(i), const_cast<NodeType*>( & (*it)));
                 }
                 else {
                     visitedValues.insert(deq.at(i)->data);
@@ -539,9 +544,30 @@ private:
         return reverseVisitedValues.find(value) != reverseVisitedValues.end();
     }
 
-    void mergeTrees() 
+    void mergeTrees(NodeType* mainNode, NodeType* reverseNode) 
     {
+        NodeType* leaf = reverseTree(reverseNode);
+        if (leaf) {
+            mainNode->parent = leaf;
+        }
+    }
 
+    NodeType* reverseTree(NodeType* leaf) {
+        if (!leaf) return nullptr;
+        if (!leaf->parent) return nullptr;
+
+        NodeType* res = leaf->parent;
+        NodeType* current = leaf->parent;
+        NodeType* prev = nullptr;
+
+        while (current) {
+            NodeType* next = current->parent;
+            current->parent = prev;
+            prev = current;
+            current = next;
+        }
+
+        return res; // возвращаю лист дерева.
     }
 
     ValueType source;
@@ -556,8 +582,9 @@ private:
     std::set<TreeDepthType> currentDepth;
     std::set<TreeDepthType> reverseCurrentDepth;
 
-    std::unordered_set<ValueType> visitedValues;
-    std::unordered_set<ValueType> reverseVisitedValues;
+    // Вместо std::unordered_set<ValueType> используйте:
+    std::unordered_map<ValueType, NodeType*> visitedValues;
+    std::unordered_map<ValueType, NodeType*> reverseVisitedValues;
 
     // TODO: вынести в другой класс
     std::deque<NodeType*> deq;

@@ -23,6 +23,17 @@ public:
 	}
 };
 
+class NodeP {
+public :
+	int data;
+	NodeP* parent;
+
+	NodeP(int data, NodeP* node) {
+		this->data = data;
+		this->parent = node;
+	}
+};
+
 void BFS(Node* root) {
 	std::deque<Node*> deq;
 	deq.push_back(root);
@@ -68,6 +79,77 @@ void binTreeTest()
 	std::cout << std::endl;
 
 	DFS(&root);
+}
+
+void obhod(NodeP* node)
+{
+	std::stack<NodeP*> stack;
+
+	// Сохраняем исходный порядок
+	while (node) {
+		stack.push(node);
+		std::cout << node->data;
+		node = node->parent;
+	}
+	std::cout << std::endl;
+
+	// Восстанавливаем исходные связи (не меняем parent)
+	NodeP* prev = nullptr;
+	while (!stack.empty())
+	{
+		NodeP* current = stack.top();
+		stack.pop();
+
+		std::cout << current->data;
+	}
+	std::cout << std::endl;
+}
+
+NodeP* reverseTree(NodeP* leaf) {
+	if (!leaf) return nullptr;
+	if (!leaf->parent) return nullptr;
+
+	NodeP* current = leaf->parent;
+	NodeP* prev = nullptr;
+
+	while (current) {
+		NodeP* next = current->parent;
+		current->parent = prev;
+		prev = current;
+		current = next;
+	}
+
+	return prev;  // возвращаем новый корень (бывший лист)
+}
+
+// Функция для печати дерева от узла к корню
+void printToRoot(NodeP* node) {
+	NodeP* current = node;
+	while (current) {
+		std::cout << current->data;
+		if (current->parent) std::cout << " -> ";
+		current = current->parent;
+	}
+	std::cout << std::endl;
+}
+
+void reverseTree() {
+
+	NodeP n9{ 9, nullptr };
+	NodeP n8{ 8, &n9 };
+	NodeP n7{ 7, &n8 };
+	NodeP n6{ 6, &n7 };
+	NodeP n5{ 5, &n6 };
+
+
+	    std::cout << "Исходное дерево (от листа к корню): ";
+    printToRoot(&n5);  // 5 -> 6 -> 7 -> 8 -> 9
+
+    // Разворачиваем дерево
+    NodeP* newRoot = reverseTree(&n5);
+
+    std::cout << "После разворота (от нового корня): ";
+    printToRoot(newRoot);  // 9 -> 8 -> 7 -> 6 -> 5
 }
 
 
@@ -158,7 +240,9 @@ void bidirectionalFinder()
 int main() 
 {
 	//OperationSequenceFinderTest();
-	bidirectionalFinder();
+	//bidirectionalFinder();
+
+	reverseTree();
 
 
 
