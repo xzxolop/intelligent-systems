@@ -1,4 +1,4 @@
-﻿
+﻿#define DEBUG_LOG_ENABLED
 
 #include <iostream>
 #include <deque>
@@ -138,6 +138,7 @@ void OperationSequenceFinderTest()
 
 void bidirectionalFinder() 
 {
+
 	OperationSequenceFinder finder{};
 
 	std::vector<std::pair<std::string, std::function<int(int)>>> operations;
@@ -150,7 +151,8 @@ void bidirectionalFinder()
 	reverseOperations.push_back({ "-3", f2_reverse });
 	finder.setReverseOperations(reverseOperations);
 
-	finder.findSequenceBidir(1, 10);
+	auto res = finder.findSequenceBidir(1, 10);
+	res.print();
 
 	
 }
@@ -159,6 +161,7 @@ int main()
 {
 	//OperationSequenceFinderTest();
 	bidirectionalFinder();
+
 
 
 	return 0;

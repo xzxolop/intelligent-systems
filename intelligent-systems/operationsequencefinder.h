@@ -189,37 +189,17 @@ public:
 #ifdef OPERATIONS_SEQUENCE_ENABLED
         // создаем source
         NodeType* sourceRoot = new NodeType(source, 0, nullptr, -1);
-        deq.push_back(sourceRoot);
-        visitedValues.insert(sourceRoot->data);
-
-        bool isFind = checkInReverseVisited(sourceRoot->data);
-        if (isFind) {
-            DEBUG_LOG(value);
-        }
-        else {
-            reverseVisitedValues.insert(sourceRoot->data);
-        }
         
         // создаем target
         NodeType* targetRoot = new NodeType(target, 0, nullptr, -1);
-        reverseDeq.push_back(targetRoot);
-        reverseVisitedValues.insert(targetRoot->data);
 
-        isFind = checkInVisited(targetRoot->data);
-        if (isFind) {
-            DEBUG_LOG(value);
-        }
-        else {
-            reverseVisitedValues.insert(targetRoot->data);
-        }
 
 #else
         NodeType* root = new NodeType(source, 0);
-        deq.push_back(sourceRoot);
-
         NodeType* targetRoot = new NodeType(target, 0);
-        reverseDeq.push_back(targetRoot);
 #endif
+        deq.push_back(sourceRoot);
+        reverseDeq.push_back(targetRoot);
 
         if (countOperations < 2) {
             treeSize = searchDepth;
@@ -230,7 +210,7 @@ public:
 
         DEBUG_LOG("source: " << source << " target: " << target << " max tree size: " << treeSize);
 
-        FinderResult res = BFSFinder(sourceRoot);
+        FinderResult res = bidirFinder(sourceRoot, targetRoot);
         clear();
 
         return res;
@@ -252,7 +232,7 @@ public:
             int sz = deq.size();
             for (int i = 0; i < sz; i++) {
                 if (checkInReverseVisited(deq.at(i)->data)) {
-                    DEBUG_LOG(deq.at(i)->data);
+                    DEBUG_LOG("checkInReverseVisited: " + std::to_string( deq.at(i)->data));
                 }
                 else {
                     visitedValues.insert(deq.at(i)->data);
@@ -283,7 +263,7 @@ public:
             sz = reverseDeq.size();
             for (int i = 0; i < sz; i++) {
                 if (checkInVisited(reverseDeq.at(i)->data)) {
-                    DEBUG_LOG(reverseDeq.at(i)->data);
+                    DEBUG_LOG("checkInVisited: " + std::to_string(reverseDeq.at(i)->data));
                 }
                 else {
                     reverseVisitedValues.insert(reverseDeq.at(i)->data);
@@ -549,12 +529,12 @@ public:
 private:
     inline bool checkInVisited(const ValueType value)
     {
-        return visitedValues.find(value) == visitedValues.end();
+        return visitedValues.find(value) != visitedValues.end();
     }
 
     inline bool checkInReverseVisited(const ValueType value) 
     {
-        return reverseVisitedValues.find(value) == reverseVisitedValues.end();
+        return reverseVisitedValues.find(value) != reverseVisitedValues.end();
     }
 
     ValueType source;
