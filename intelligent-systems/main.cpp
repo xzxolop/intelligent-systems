@@ -153,8 +153,6 @@ void bidirectionalFinder()
 
 	auto res = finder.findSequenceBidir(1, 10);
 	res.print();
-
-	
 }
 
 int main() 

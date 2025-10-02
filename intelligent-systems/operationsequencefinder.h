@@ -227,7 +227,7 @@ public:
         }
 
         // and / or
-        while (!deq.empty() || !reverseDeq.empty()) {
+        while (!deq.empty()) {
       
             int sz = deq.size();
             for (int i = 0; i < sz; i++) {
@@ -327,6 +327,32 @@ public:
         return res;
     }
 
+    void clear() {
+        for (NodeType* ptr : deq) {
+            delete ptr;
+        }
+        deq.clear();
+
+        // TODO: вынести в другой класс
+        for (NodeType* ptr : reverseDeq) {
+            delete ptr;
+        }
+        reverseDeq.clear();
+
+        while (!stack.empty()) {
+            NodeType* ptr = stack.top();
+            delete ptr;
+            stack.pop();
+        }
+
+        visitedValues.clear();
+        currentDepth.clear();
+        setSize = 0;
+    }
+
+
+private:
+
     FinderResult BFSFinder(NodeType* node)
     {
         bool isFind = checkNode(node);
@@ -335,7 +361,7 @@ public:
             return FinderResult{ source, target, true, node, deq.size() , _operations };
         }
 
-        while(!deq.empty()) {
+        while (!deq.empty()) {
             NodeType* node = deq.front();
             deq.pop_front();
             if (node) {
@@ -347,7 +373,7 @@ public:
 
                 currentDepth.insert(node->depth);
                 if (setSize != currentDepth.size()) {
-                    DEBUG_LOG("Depth is " << currentDepth.size() -1 << ", deque size: " << deq.size() << "; ");
+                    DEBUG_LOG("Depth is " << currentDepth.size() - 1 << ", deque size: " << deq.size() << "; ");
                     setSize = currentDepth.size();
                 }
 
@@ -376,10 +402,10 @@ public:
 
                 TreeDepthType newDepth = parent->depth + 1;
 #ifdef OPERATIONS_SEQUENCE_ENABLED
-                NodeType* node = new NodeType{ value, newDepth, parent, i};
-                
+                NodeType* node = new NodeType{ value, newDepth, parent, i };
+
 #else
-                NodeType* node = new NodeType{ value, newDepth};
+                NodeType* node = new NodeType{ value, newDepth };
 #endif
                 deq.push_back(node);
             }
@@ -503,30 +529,6 @@ public:
         else return false;
     }
 
-    void clear() {
-        for (NodeType* ptr : deq) {
-            delete ptr;
-        }
-        deq.clear();
-
-        // TODO: вынести в другой класс
-        for (NodeType* ptr : reverseDeq) {
-            delete ptr;
-        }
-        reverseDeq.clear();
-
-        while (!stack.empty()) {
-            NodeType* ptr = stack.top();
-            delete ptr;
-            stack.pop();
-        }
-
-        visitedValues.clear();
-        currentDepth.clear();
-        setSize = 0;
-    }
-
-private:
     inline bool checkInVisited(const ValueType value)
     {
         return visitedValues.find(value) != visitedValues.end();
@@ -535,6 +537,11 @@ private:
     inline bool checkInReverseVisited(const ValueType value) 
     {
         return reverseVisitedValues.find(value) != reverseVisitedValues.end();
+    }
+
+    void mergeTrees() 
+    {
+
     }
 
     ValueType source;
