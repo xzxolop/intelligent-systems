@@ -167,7 +167,7 @@ public:
         _operations = operations;
     }
 
-    void setReverseOperators(const std::vector<std::pair<std::string, std::function<int(int)>>>& reverseOperations) 
+    void setReverseOperations(const std::vector<std::pair<std::string, std::function<int(int)>>>& reverseOperations)
     {
         _reverseOperations = reverseOperations;
     }
@@ -175,8 +175,9 @@ public:
     // TODO: Эта функция создает мешанину. По-хорошему нужно вынести в отдельный класс отнаслед. от этого.
     FinderResult findSequenceBidir(ValueType source, ValueType target, TreeDepthType searchDepth = 20) 
     {
-        if (!_reverseOperations.size()) {
-            std::cout << "Reverse operations is not defined. Please call setReverseOperators method!" << std::endl;
+
+        if (_reverseOperations.size() != _operations.size()) {
+            std::cout << "Reverse operations is not assign with forward operations. Please call setReverseOperators method!" << std::endl;
             return FinderResult{ source, target, false, nullptr, deq.size() , _operations };
         }
 
@@ -188,16 +189,37 @@ public:
 #ifdef OPERATIONS_SEQUENCE_ENABLED
         // создаем source
         NodeType* sourceRoot = new NodeType(source, 0, nullptr, -1);
+        deq.push_back(sourceRoot);
+        visitedValues.insert(sourceRoot->data);
+
+        bool isFind = checkInReverseVisited(sourceRoot->data);
+        if (isFind) {
+            DEBUG_LOG(value);
+        }
+        else {
+            reverseVisitedValues.insert(sourceRoot->data);
+        }
         
         // создаем target
         NodeType* targetRoot = new NodeType(target, 0, nullptr, -1);
+        reverseDeq.push_back(targetRoot);
+        reverseVisitedValues.insert(targetRoot->data);
+
+        isFind = checkInVisited(targetRoot->data);
+        if (isFind) {
+            DEBUG_LOG(value);
+        }
+        else {
+            reverseVisitedValues.insert(targetRoot->data);
+        }
+
 #else
         NodeType* root = new NodeType(source, 0);
-        NodeType* targetRoot = new NodeType(target, 0);
-#endif
-
         deq.push_back(sourceRoot);
+
+        NodeType* targetRoot = new NodeType(target, 0);
         reverseDeq.push_back(targetRoot);
+#endif
 
         if (countOperations < 2) {
             treeSize = searchDepth;
@@ -221,34 +243,79 @@ public:
         bool isFind = checkNode(sourceNode);
 
         if (isFind) {
-            return FinderResult{ source, target, true, node, deq.size() , _operations };
+            return FinderResult{ source, target, true, sourceNode, deq.size() , _operations };
         }
 
-        while (!deq.empty()) {
-            NodeType* node = deq.front();
-            deq.pop_front();
-            if (node) {
-                isFind = checkNode(node);
-
-                if (isFind) {
-                    return FinderResult{ source, target, true, node, deq.size(), _operations };
+        // and / or
+        while (!deq.empty() || !reverseDeq.empty()) {
+      
+            int sz = deq.size();
+            for (int i = 0; i < sz; i++) {
+                if (checkInReverseVisited(deq.at(i)->data)) {
+                    DEBUG_LOG(deq.at(i)->data);
                 }
+                else {
+                    visitedValues.insert(deq.at(i)->data);
 
-                currentDepth.insert(node->depth);
-                if (setSize != currentDepth.size()) {
-                    DEBUG_LOG("Depth is " << currentDepth.size() - 1 << ", deque size: " << deq.size() << "; ");
-                    setSize = currentDepth.size();
+
+                    NodeType* node = deq.front();
+                    deq.pop_front();
+                    if (node) {
+                        isFind = checkNode(node);
+
+                        if (isFind) {
+                            return FinderResult{ source, target, true, node, deq.size(), _operations };
+                        }
+
+                        currentDepth.insert(node->depth);
+                        if (setSize != currentDepth.size()) {
+                            DEBUG_LOG("Depth is " << currentDepth.size() - 1 << ", deque size: " << deq.size() << "; ");
+                            setSize = currentDepth.size();
+                        }
+
+                        if (node->depth + 1 < searchDepth) {
+                            createNodeDeq(node);
+                        }
+                    }
                 }
-
-                if (node->depth + 1 < searchDepth) {
-                    createNodeDeq(node);
-                }
-
-                //delete node;
             }
+
+            sz = reverseDeq.size();
+            for (int i = 0; i < sz; i++) {
+                if (checkInVisited(reverseDeq.at(i)->data)) {
+                    DEBUG_LOG(reverseDeq.at(i)->data);
+                }
+                else {
+                    reverseVisitedValues.insert(reverseDeq.at(i)->data);
+
+
+                    NodeType* node = reverseDeq.front();
+                    reverseDeq.pop_front();
+                    if (node) {
+                        //isFind = checkNode(node);
+
+                        /*if (isFind) {
+                            return FinderResult{ source, target, true, node, reverseDeq.size(), _operations };
+                        }*/
+
+                        /*currentDepth.insert(node->depth);
+                        if (setSize != currentDepth.size()) {
+                            DEBUG_LOG("Depth is " << currentDepth.size() - 1 << ", reverseDeq size: " << reverseDeq.size() << "; ");
+                            setSize = currentDepth.size();
+                        }*/
+
+                        //if (node->depth + 1 < searchDepth) {
+                        createNodeReverseDeq(node);
+                        //}
+                    }
+                }
+            }
+
+            
+
         }
 
-        return FinderResult{ source, target, false, node, deq.size(), _operations };;
+        return FinderResult{ source, target, false, sourceNode, deq.size(), _operations };;
 
     }
 
@@ -321,7 +388,6 @@ public:
             return;
         }
 
-
         for (OperationsNumberType i = 0; i < _operations.size(); i++) {
             auto func = _operations.at(i).second;
             ValueType value = func(parent->data);
@@ -336,6 +402,30 @@ public:
                 NodeType* node = new NodeType{ value, newDepth};
 #endif
                 deq.push_back(node);
+            }
+        }
+    }
+
+    void createNodeReverseDeq(NodeType* parent)
+    {
+        if (!parent) {
+            return;
+        }
+
+        for (OperationsNumberType i = 0; i < _reverseOperations.size(); i++) {
+            auto func = _reverseOperations.at(i).second;
+            ValueType value = func(parent->data);
+            if (reverseVisitedValues.find(value) == reverseVisitedValues.end()) {
+                reverseVisitedValues.insert(value);
+
+                TreeDepthType newDepth = parent->depth + 1;
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+                NodeType* node = new NodeType{ value, newDepth, parent, i };
+
+#else
+                NodeType* node = new NodeType{ value, newDepth };
+#endif
+                reverseDeq.push_back(node);
             }
         }
     }
@@ -457,24 +547,40 @@ public:
     }
 
 private:
+    inline bool checkInVisited(const ValueType value)
+    {
+        return visitedValues.find(value) == visitedValues.end();
+    }
+
+    inline bool checkInReverseVisited(const ValueType value) 
+    {
+        return reverseVisitedValues.find(value) == reverseVisitedValues.end();
+    }
+
+    ValueType source;
+    ValueType target;
+
     unsigned short countOperations = 2;
     TreeDepthType searchDepth = 0;
+
     size_t treeSize;
     size_t setSize;
     
     std::set<TreeDepthType> currentDepth;
+    std::set<TreeDepthType> reverseCurrentDepth;
+
     std::unordered_set<ValueType> visitedValues;
+    std::unordered_set<ValueType> reverseVisitedValues;
+
+    // TODO: вынести в другой класс
+    std::deque<NodeType*> deq;
+    std::deque<NodeType*> reverseDeq;
+
+    // Без указателя будет переполнение стека?
+    std::stack<NodeType*> stack;
+
     std::vector<std::pair<std::string, std::function<int(int)>>> _operations;
     std::vector<std::pair<std::string, std::function<int(int)>>> _reverseOperations;
 
-    // Без указателя будет переполнение стека?
-    std::deque<NodeType*> deq;
-    std::stack<NodeType*> stack;
-
-    // TODO: вынести в другой класс
-    std::deque<NodeType*> reverseDeq;
-
-    ValueType source;
-    ValueType target;
 };
 

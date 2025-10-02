@@ -57,17 +57,17 @@ void DFS(Node* root) {
 
 void binTreeTest() 
 {
-	/*Node n4{ 5, nullptr, nullptr };
-Node n3{ 4, nullptr, nullptr };
-Node n2{ 3, nullptr, nullptr};
-Node n1{ 2, &n3, &n4};
+	Node n4{ 5, nullptr, nullptr };
+	Node n3{ 4, nullptr, nullptr };
+	Node n2{ 3, nullptr, nullptr};
+	Node n1{ 2, &n3, &n4};
 
-Node root{1, &n1, &n2};
+	Node root{1, &n1, &n2};
 
-BFS(&root);
-std::cout << std::endl;
+	BFS(&root);
+	std::cout << std::endl;
 
-DFS(&root);*/
+	DFS(&root);
 }
 
 
@@ -136,9 +136,29 @@ void OperationSequenceFinderTest()
 
 }
 
+void bidirectionalFinder() 
+{
+	OperationSequenceFinder finder{};
+
+	std::vector<std::pair<std::string, std::function<int(int)>>> operations;
+	operations.push_back({ "*2", f1 });
+	operations.push_back({ "+3", f2 });
+	finder.setOperations(operations);
+
+	std::vector<std::pair<std::string, std::function<int(int)>>> reverseOperations;
+	reverseOperations.push_back({ ":2", f1_reverse });
+	reverseOperations.push_back({ "-3", f2_reverse });
+	finder.setReverseOperations(reverseOperations);
+
+	finder.findSequenceBidir(1, 10);
+
+	
+}
+
 int main() 
 {
-	OperationSequenceFinderTest();
+	//OperationSequenceFinderTest();
+	bidirectionalFinder();
 
 
 	return 0;
