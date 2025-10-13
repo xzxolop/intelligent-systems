@@ -109,6 +109,8 @@ NodeP* reverseTree(NodeP* leaf) {
 	if (!leaf) return nullptr;
 	if (!leaf->parent) return nullptr;
 
+	std::cout << leaf->parent->data <<std::endl;
+
 	NodeP* current = leaf->parent;
 	NodeP* prev = nullptr;
 
@@ -117,6 +119,7 @@ NodeP* reverseTree(NodeP* leaf) {
 		current->parent = prev;
 		prev = current;
 		current = next;
+		//std::cout << next->data << prev->data << current->data << std::endl;
 	}
 
 	return prev;  // возвращаем новый корень (бывший лист)
@@ -147,6 +150,7 @@ void reverseTree() {
 
     // Разворачиваем дерево
     NodeP* newRoot = reverseTree(&n5);
+	std::cout << "nodeP" << newRoot->data << std::endl;
 
     std::cout << "После разворота (от нового корня): ";
     printToRoot(newRoot);  // 9 -> 8 -> 7 -> 6 -> 5
@@ -177,7 +181,7 @@ int f3_reverse(int a) {
 
 void OperationSequenceFinderTest() 
 {
-//#define DEBUG_LOG_ENABLED
+#define DEBUG_LOG_ENABLED
 
 
 	OperationSequenceFinder finder{};
@@ -233,16 +237,38 @@ void bidirectionalFinder()
 	reverseOperations.push_back({ "-3", f2_reverse });
 	finder.setReverseOperations(reverseOperations);
 
-	auto res = finder.findSequenceBidir(1, 10);
-	res.print();
+	FINDER_TIME_TEST_MCS(finder.findSequenceBidir, 1, 5000000, 31);
+}
+
+void forwardVSbidir() {
+	OperationSequenceFinder finder{};
+
+	std::vector<std::pair<std::string, std::function<int(int)>>> operations;
+	operations.push_back({ "*2", f1 });
+	operations.push_back({ "+3", f2 });
+	finder.setOperations(operations);
+
+	std::vector<std::pair<std::string, std::function<int(int)>>> reverseOperations;
+	reverseOperations.push_back({ ":2", f1_reverse });
+	reverseOperations.push_back({ "-3", f2_reverse });
+	finder.setReverseOperations(reverseOperations);
+
+	
+
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 5000000, 31);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBidir, 1, 5000000, 31);
 }
 
 int main() 
 {
 	OperationSequenceFinderTest();
-	//bidirectionalFinder();
-
+	
 	//reverseTree();
+	//bidirectionalFinder();
+	
+
+	// Скорость многократно!
+	//forwardVSbidir();
 
 
 
