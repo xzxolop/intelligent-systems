@@ -150,45 +150,48 @@ public:
         }
 
     public: 
-        FinderResult(ValueType source, ValueType target, int isFind, NodeType* node, size_t contSize, 
+        FinderResult(ValueType source, ValueType target, int isFind, NodeType* node, size_t contSize,
             const std::vector<std::pair<std::string, std::function<int(int)>>>& operations)
             : _source(source)
             , _target(target)
             , _isFind(isFind)
-            , _depth(0)
+            , _depth(0)  // инициализируем 0
             , _containerSize(contSize)
-            // использовано памяти = размер указателя * размер ноды * кол-во
             , _memoryUsed(8 * sizeof(NodeType) * _containerSize)
-
 #ifdef OPERATIONS_SEQUENCE_ENABLED
             , operationSequence("")
             , _operations(operations)
 #endif
         {
 #ifdef OPERATIONS_SEQUENCE_ENABLED
-            if (node) {
-                _depth = node->depth;
-            }
+            if (isFind && node) {
+                // Сначала вычисляем глубину
+                NodeType* temp = node;
+                while (temp) {
+                    _depth++;
+                    temp = temp->parent;
+                }
+                _depth--; // вычитаем корневой узел
 
-            if (isFind) {
-                std::stack<NodeType*> stack;
-                stack.push(node);
+                // Затем собираем последовательность операций
+                std::vector<std::string> operationsList;
+                temp = node;
 
-                while (stack.top()->parent != nullptr) {
-                    NodeType* node = stack.top();
-                    stack.push(node->parent);
+                while (temp && temp->parent) {
+                    int opNumb = temp->operationNumber;
+                    if (opNumb >= 0 && opNumb < _operations.size()) {
+                        operationsList.push_back(_operations.at(opNumb).first);
+                    }
+                    temp = temp->parent;
                 }
 
-                while (!stack.empty()) {
-                    NodeType* node = stack.top();
-                    stack.pop();
+                // Разворачиваем последовательность операций
+                for (auto it = operationsList.rbegin(); it != operationsList.rend(); ++it) {
+                    operationSequence += *it + " ";
+                }
 
-                    int opNumb = node->operationNumber;
-                    if (opNumb >= 0 && opNumb < _operations.size()) {
-                        std::string operation = _operations.at(opNumb).first;
-                        operationSequence += operation += " ";
-                        operationSequence += " ";
-                    }
+                if (!operationSequence.empty()) {
+                    operationSequence.pop_back();
                 }
             }
 #endif
@@ -283,74 +286,65 @@ public:
     }
 
     FinderResult bidirFinder(NodeType* sourceNode, NodeType* targetNode) {
-
-
         bool isFind = checkNode(sourceNode);
-
         if (isFind) {
-            return FinderResult{ source, target, true, sourceNode, deq.size() , _operations };
+            return FinderResult{ source, target, true, sourceNode, deq.size(), _operations };
         }
 
-        // and / or
-        while (!deq.empty()) {
-      
+        while (!deq.empty() && !reverseDeq.empty()) {
+            // Обработка прямого направления
             int sz = deq.size();
             for (int i = 0; i < sz; i++) {
-                
-                if (checkInReverseVisited(deq.at(i)->data)) {
-                    DEBUG_LOG("checkInReverseVisited: " + std::to_string( deq.at(i)->data));
-                    auto node = map2[deq.at(i)->data];
-                    NodeType* res = mergeTrees(deq.at(i), node);
-                    return FinderResult{ source, target, true, res, deq.size() , _operations };
+                NodeType* currentNode = deq.front();
+                deq.pop_front();
+
+                if (checkInReverseVisited(currentNode->data)) {
+                    DEBUG_LOG("Found intersection at: " + std::to_string(currentNode->data));
+                    NodeType* reverseNode = map2[currentNode->data];
+                    NodeType* resultNode = mergeTrees(currentNode, reverseNode);
+                    return FinderResult{ source, target, true, resultNode, deq.size() + reverseDeq.size(), _operations };
                 }
-                else {
-                    map1.insert({ deq.at(i)->data, deq.at(i)});
-                    NodeType* node = deq.front();
-                    deq.pop_front();
-                    if (node) {
-                        isFind = checkNode(node);
 
-                        if (isFind) {
-                            return FinderResult{ source, target, true, node, deq.size(), _operations };
-                        }
+                map1[currentNode->data] = currentNode;
 
-                        currentDepth.insert(node->depth);
-                        if (setSize != currentDepth.size()) {
-                            DEBUG_LOG("Depth is " << currentDepth.size() - 1 << ", deque size: " << deq.size() << "; ");
-                            setSize = currentDepth.size();
-                        }
+                isFind = checkNode(currentNode);
+                if (isFind) {
+                    return FinderResult{ source, target, true, currentNode, deq.size(), _operations };
+                }
 
-                        if (node->depth + 1 < searchDepth) {
-                            createNodeDeq(node);
-                        }
-                    }
+                currentDepth.insert(currentNode->depth);
+                if (setSize != currentDepth.size()) {
+                    DEBUG_LOG("Forward Depth is " << currentDepth.size() - 1 << ", deque size: " << deq.size());
+                    setSize = currentDepth.size();
+                }
+
+                if (currentNode->depth + 1 < searchDepth) {
+                    createNodeDeq(currentNode);
                 }
             }
 
+            // Обработка обратного направления
             sz = reverseDeq.size();
             for (int i = 0; i < sz; i++) {
-                if (checkInVisited(reverseDeq.at(i)->data)) {
-                    DEBUG_LOG("checkInVisited: " + std::to_string(reverseDeq.at(i)->data));
-                    auto node = map1[reverseDeq.at(i)->data];
-                    NodeType* res = mergeTrees(reverseDeq.at(i), node);
-                    return FinderResult{ source, target, true, res, reverseDeq.size() , _operations };
+                NodeType* currentNode = reverseDeq.front();
+                reverseDeq.pop_front();
+
+                if (checkInVisited(currentNode->data)) {
+                    DEBUG_LOG("Found intersection at: " + std::to_string(currentNode->data));
+                    NodeType* forwardNode = map1[currentNode->data];
+                    NodeType* resultNode = mergeTrees(forwardNode, currentNode);
+                    return FinderResult{ source, target, true, resultNode, deq.size() + reverseDeq.size(), _operations };
                 }
-                else {
-                    map2.insert({ reverseDeq.at(i)->data, reverseDeq.at(i) });
-                    NodeType* node = reverseDeq.front();
-                    reverseDeq.pop_front();
-                    if (node) {
-                        createNodeReverseDeq(node);
-                    }
+
+                map2[currentNode->data] = currentNode;
+
+                if (currentNode->depth + 1 < searchDepth) {
+                    createNodeReverseDeq(currentNode);
                 }
             }
-
-            map1.clear();
-            map2.clear();
         }
 
-        return FinderResult{ source, target, false, sourceNode, deq.size(), _operations };;
-
+        return FinderResult{ source, target, false, sourceNode, deq.size(), _operations };
     }
 
     // В ширину
@@ -593,56 +587,50 @@ private:
         return map2.find(value) != map2.end();
     }
 
-    NodeType* mergeTrees(NodeType* mainNode, NodeType* reverseNode) 
+    NodeType* mergeTrees(NodeType* forwardNode, NodeType* reverseNode)
     {
-        auto pair = reverseTree(reverseNode);
-        NodeType* first = pair.first;
-        NodeType* second = pair.second;
+        // Создаем новый узел, который будет связующим звеном
+        // Этот узел будет содержать операцию из обратного дерева
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        NodeType* bridgeNode = new NodeType{ forwardNode->data, forwardNode->depth, forwardNode, reverseNode->operationNumber };
+#else
+        NodeType* bridgeNode = new NodeType{ forwardNode->data, forwardNode->depth };
+#endif
 
-        if (first) {
-            std::cout << std::endl;
-            std::cout << "first:" << first->data << std::endl;
-            std::cout << std::endl;
-        }
-        else {
-            DEBUG_LOG("null first");
-        }
-        
-        if (second) {
-            std::cout << std::endl;
-            std::cout << "second:" << second->data << std::endl;
-            std::cout << std::endl;
-        }
-        else {
-            DEBUG_LOG("null sec");
+        // Теперь связываем обратное дерево через bridgeNode
+        if (reverseNode->parent) {
+            bridgeNode->parent = reverseNode->parent;
+            // Обновляем операцию для bridgeNode на операцию из обратного пути
+            bridgeNode->operationNumber = reverseNode->operationNumber;
         }
 
-        if (first) {
-            mainNode->parent = first;
-        }
-        return second;
+        return bridgeNode;
     }
 
     // возвращает указатель на новый root, с которым связывается основное дерево и указатель на новый лист (res), 
     // который будет возвращен как результат.
+    // возвращает указатель на новый root, с которым связывается основное дерево и указатель на новый лист (res), 
+// который будет возвращен как результат.
     std::pair<NodeType*, NodeType*> reverseTree(NodeType* leaf) {
-        if (!leaf) return std::pair<NodeType*, NodeType*>{nullptr, nullptr};
-        if (!leaf->parent) return std::pair<NodeType*, NodeType*>{nullptr, nullptr};
+        if (!leaf) return { nullptr, nullptr };
 
-        NodeType* newRoot = leaf->parent;
-
-        NodeType* res = leaf->parent;
-        NodeType* current = leaf->parent;
+        NodeType* current = leaf;
         NodeType* prev = nullptr;
+        NodeType* newRoot = nullptr;
 
         while (current) {
             NodeType* next = current->parent;
             current->parent = prev;
+
+            if (!next) {
+                newRoot = current; // Это будет новый корень перевернутого дерева
+            }
+
             prev = current;
             current = next;
         }
 
-        return std::pair<NodeType*, NodeType*>{newRoot, res};
+        return { newRoot, leaf }; // Возвращаем новый корень и исходный лист
     }
 
     ValueType source;
