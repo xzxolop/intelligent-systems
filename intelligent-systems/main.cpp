@@ -109,6 +109,8 @@ NodeP* reverseTree(NodeP* leaf) {
 	if (!leaf) return nullptr;
 	if (!leaf->parent) return nullptr;
 
+	std::cout << leaf->parent->data <<std::endl;
+
 	NodeP* current = leaf->parent;
 	NodeP* prev = nullptr;
 
@@ -117,6 +119,7 @@ NodeP* reverseTree(NodeP* leaf) {
 		current->parent = prev;
 		prev = current;
 		current = next;
+		//std::cout << next->data << prev->data << current->data << std::endl;
 	}
 
 	return prev;  // возвращаем новый корень (бывший лист)
@@ -147,6 +150,7 @@ void reverseTree() {
 
     // Разворачиваем дерево
     NodeP* newRoot = reverseTree(&n5);
+	std::cout << "nodeP" << newRoot->data << std::endl;
 
     std::cout << "После разворота (от нового корня): ";
     printToRoot(newRoot);  // 9 -> 8 -> 7 -> 6 -> 5
@@ -233,14 +237,14 @@ void bidirectionalFinder()
 	reverseOperations.push_back({ "-3", f2_reverse });
 	finder.setReverseOperations(reverseOperations);
 
-	auto res = finder.findSequenceBidir(1, 10);
+	auto res = finder.findSequenceBidir(1, 100);
 	res.print();
 }
 
 int main() 
 {
-	OperationSequenceFinderTest();
-	//bidirectionalFinder();
+	//OperationSequenceFinderTest();
+	bidirectionalFinder();
 
 	//reverseTree();
 

@@ -74,6 +74,7 @@
 #include <type_traits>
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 #include "macros.h"
 
@@ -298,15 +299,12 @@ public:
                 
                 if (checkInReverseVisited(deq.at(i)->data)) {
                     DEBUG_LOG("checkInReverseVisited: " + std::to_string( deq.at(i)->data));
-
-                    
-                    auto it = visitedValues.find(deq.at(i)->data);
-                    //mergeTrees(deq.at(i), const_cast<NodeType*>( & (*it)));
+                    auto node = map2[deq.at(i)->data];
+                    NodeType* res = mergeTrees(deq.at(i), node);
+                    return FinderResult{ source, target, true, res, deq.size() , _operations };
                 }
                 else {
-                    visitedValues.insert(deq.at(i)->data);
-
-
+                    map1.insert({ deq.at(i)->data, deq.at(i)});
                     NodeType* node = deq.front();
                     deq.pop_front();
                     if (node) {
@@ -333,35 +331,22 @@ public:
             for (int i = 0; i < sz; i++) {
                 if (checkInVisited(reverseDeq.at(i)->data)) {
                     DEBUG_LOG("checkInVisited: " + std::to_string(reverseDeq.at(i)->data));
+                    auto node = map1[deq.at(i)->data];
+                    NodeType* res = mergeTrees(deq.at(i), node);
+                    return FinderResult{ source, target, true, res, deq.size() , _operations };
                 }
                 else {
-                    reverseVisitedValues.insert(reverseDeq.at(i)->data);
-
-
+                    map2.insert({ deq.at(i)->data, deq.at(i) });
                     NodeType* node = reverseDeq.front();
                     reverseDeq.pop_front();
                     if (node) {
-                        //isFind = checkNode(node);
-
-                        /*if (isFind) {
-                            return FinderResult{ source, target, true, node, reverseDeq.size(), _operations };
-                        }*/
-
-                        /*currentDepth.insert(node->depth);
-                        if (setSize != currentDepth.size()) {
-                            DEBUG_LOG("Depth is " << currentDepth.size() - 1 << ", reverseDeq size: " << reverseDeq.size() << "; ");
-                            setSize = currentDepth.size();
-                        }*/
-
-                        //if (node->depth + 1 < searchDepth) {
                         createNodeReverseDeq(node);
-                        //}
                     }
                 }
             }
 
-            
-
+            map1.clear();
+            map2.clear();
         }
 
         return FinderResult{ source, target, false, sourceNode, deq.size(), _operations };;
@@ -600,25 +585,39 @@ private:
 
     inline bool checkInVisited(const ValueType value)
     {
-        return visitedValues.find(value) != visitedValues.end();
+        return map1.find(value) != map1.end();
     }
 
     inline bool checkInReverseVisited(const ValueType value) 
     {
-        return reverseVisitedValues.find(value) != reverseVisitedValues.end();
+        return map2.find(value) != map2.end();
     }
 
-    void mergeTrees(NodeType* mainNode, NodeType* reverseNode) 
+    NodeType* mergeTrees(NodeType* mainNode, NodeType* reverseNode) 
     {
-        NodeType* leaf = reverseTree(reverseNode);
-        if (leaf) {
-            mainNode->parent = leaf;
+        auto pair = reverseTree(reverseNode);
+        NodeType* first = pair.first;
+        NodeType* second = pair.second;
+
+        if (first && second) {
+            std::cout << std::endl;
+            std::cout << "first:" << first->data << "second:" << second->data << std::endl;
+            std::cout << std::endl;
         }
+
+        if (first) {
+            mainNode->parent = first;
+        }
+        return second;
     }
 
-    NodeType* reverseTree(NodeType* leaf) {
-        if (!leaf) return nullptr;
-        if (!leaf->parent) return nullptr;
+    // возвращает указатель на новый root, с которым связывается основное дерево и указатель на новый лист (res), 
+    // который будет возвращен как результат.
+    std::pair<NodeType*, NodeType*> reverseTree(NodeType* leaf) {
+        if (!leaf) return std::pair<NodeType*, NodeType*>{nullptr, nullptr};
+        if (!leaf->parent) return std::pair<NodeType*, NodeType*>{nullptr, nullptr};
+
+        NodeType* newRoot = leaf->parent;
 
         NodeType* res = leaf->parent;
         NodeType* current = leaf->parent;
@@ -631,7 +630,7 @@ private:
             current = next;
         }
 
-        return res; // возвращаю лист дерева.
+        return std::pair<NodeType*, NodeType*>{newRoot, res};
     }
 
     ValueType source;
@@ -650,8 +649,8 @@ private:
     std::unordered_set<ValueType> reverseVisitedValues;
 
     // Вместо std::unordered_set<ValueType> используйте:
-    //std::unordered_map<ValueType, NodeType*> visitedValues;
-    //std::unordered_map<ValueType, NodeType*> reverseVisitedValues;
+    std::unordered_map<ValueType, NodeType*> map1; // для посещенных значений forward
+    std::unordered_map<ValueType, NodeType*> map2; // для посещенных значений reverse
 
     // TODO: вынести в другой класс
     std::deque<NodeType*> deq;
