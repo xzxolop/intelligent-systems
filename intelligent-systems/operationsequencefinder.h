@@ -1,33 +1,18 @@
 ﻿#pragma once
 
-#include <deque>
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <set>
-#include <stack>
-#include <unordered_set>
-#include <type_traits>
-#include <functional>
-#include <string>
-
-#include "macros.h"
-
-#define OPERATIONS_SEQUENCE_ENABLED
-
 /*
     # OperationSequenceFinder
 
     Класс OperationSequenceFinder предоставляет методы решения задач в пространстве состояний.
-    Класс принимает на вход начальное и целевое число, а также арифмитические операции, с 
+    Класс принимает на вход начальное и целевое число, а также арифмитические операции, с
     помощью которых класс пытаетя придти из начального в целевое число.
 
     ## Подробное описание
 
-    Класс основан на объектно-ориентированном подходе, не использует решений вида комбинации трех векторов, 
-    а основан на дереве, где Node узел дерева. Класс реализует методы поиска в ширину и в глубину (двунаправленный 
-    поиск находится на этапе реализации). 
-    
+    Класс основан на объектно-ориентированном подходе, не использует решений вида комбинации трех векторов,
+    а основан на дереве, где Node узел дерева. Класс реализует методы поиска в ширину и в глубину (двунаправленный
+    поиск находится на этапе реализации).
+
     В класс передается (setOperations method) вектор пар вида <имя функция>, функция - арифмитическая операция
     которая будет использоваться для поиска. Их число по-сути не ограничено. После чего вызывается функция поиска
     (findSequenceBFS, findSequenceDFS) которая возвращает результат ввиде класса.
@@ -61,7 +46,7 @@
 
     ### methods
 
-    setOperations - принимает вектор пар, которые имеют вид <имя функции, функция>, с помощью которых будет 
+    setOperations - принимает вектор пар, которые имеют вид <имя функции, функция>, с помощью которых будет
     проходить поиск.
 
     FinderResult findSequenceBFS(ValueType source, ValueType target, TreeDepthType searchDepth = 20) - поиск в ширину
@@ -73,11 +58,26 @@
 
 
     ### Что следует сделать
-    
+
     1. Заменить значения в контейнерах с NodeType* на NodeType
     2. Реализовать двунаправленный поиск
 
 */
+
+#include <deque>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <unordered_set>
+#include <type_traits>
+#include <functional>
+#include <string>
+
+#include "macros.h"
+
+#define OPERATIONS_SEQUENCE_ENABLED
 
 class OperationSequenceFinder
 {
