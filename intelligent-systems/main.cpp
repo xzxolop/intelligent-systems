@@ -261,10 +261,10 @@ void forwardVSbidir() {
 
 int main() 
 {
-	//OperationSequenceFinderTest();
+	OperationSequenceFinderTest();
 	
 	//reverseTree();
-	bidirectionalFinder();
+	//bidirectionalFinder();
 	
 
 	// Скорость многократно!

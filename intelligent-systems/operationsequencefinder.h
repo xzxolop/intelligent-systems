@@ -593,34 +593,24 @@ private:
         return map2.find(value) != map2.end();
     }
 
-    NodeType* mergeTrees(NodeType* mainNode, NodeType* reverseNode) 
+    NodeType* mergeTrees(NodeType* forwardNode, NodeType* reverseNode)
     {
-        auto pair = reverseTree(reverseNode);
-        NodeType* first = pair.first;
-        NodeType* second = pair.second;
+        // Создаем новый узел, который будет связующим звеном
+        // Этот узел будет содержать операцию из обратного дерева
+#ifdef OPERATIONS_SEQUENCE_ENABLED
+        NodeType* bridgeNode = new NodeType{ forwardNode->data, forwardNode->depth, forwardNode, reverseNode->operationNumber };
+#else
+        NodeType* bridgeNode = new NodeType{ forwardNode->data, forwardNode->depth };
+#endif
 
-        if (first) {
-            std::cout << std::endl;
-            std::cout << "first:" << first->data << std::endl;
-            std::cout << std::endl;
-        }
-        else {
-            DEBUG_LOG("null first");
-        }
-        
-        if (second) {
-            std::cout << std::endl;
-            std::cout << "second:" << second->data << std::endl;
-            std::cout << std::endl;
-        }
-        else {
-            DEBUG_LOG("null sec");
+        // Теперь связываем обратное дерево через bridgeNode
+        if (reverseNode->parent) {
+            bridgeNode->parent = reverseNode->parent;
+            // Обновляем операцию для bridgeNode на операцию из обратного пути
+            bridgeNode->operationNumber = reverseNode->operationNumber;
         }
 
-        if (first) {
-            mainNode->parent = first;
-        }
-        return second;
+        return bridgeNode;
     }
 
     // возвращает указатель на новый root, с которым связывается основное дерево и указатель на новый лист (res), 
