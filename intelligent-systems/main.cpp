@@ -255,8 +255,8 @@ void forwardVSbidir() {
 
 	
 
-	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 500000, 31);
-	FINDER_TIME_TEST_MCS(finder.findSequenceBidir, 1, 500000, 31);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 5000000, 31);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBidir, 1, 5000000, 31);
 }
 
 int main() 
