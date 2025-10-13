@@ -237,7 +237,7 @@ public:
 
                     
                     auto it = visitedValues.find(deq.at(i)->data);
-                    mergeTrees(deq.at(i), const_cast<NodeType*>( & (*it)));
+                    //mergeTrees(deq.at(i), const_cast<NodeType*>( & (*it)));
                 }
                 else {
                     visitedValues.insert(deq.at(i)->data);
@@ -582,9 +582,12 @@ private:
     std::set<TreeDepthType> currentDepth;
     std::set<TreeDepthType> reverseCurrentDepth;
 
+    std::unordered_set<ValueType> visitedValues;
+    std::unordered_set<ValueType> reverseVisitedValues;
+
     // Вместо std::unordered_set<ValueType> используйте:
-    std::unordered_map<ValueType, NodeType*> visitedValues;
-    std::unordered_map<ValueType, NodeType*> reverseVisitedValues;
+    //std::unordered_map<ValueType, NodeType*> visitedValues;
+    //std::unordered_map<ValueType, NodeType*> reverseVisitedValues;
 
     // TODO: вынести в другой класс
     std::deque<NodeType*> deq;

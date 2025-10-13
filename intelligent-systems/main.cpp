@@ -239,10 +239,10 @@ void bidirectionalFinder()
 
 int main() 
 {
-	//OperationSequenceFinderTest();
+	OperationSequenceFinderTest();
 	//bidirectionalFinder();
 
-	reverseTree();
+	//reverseTree();
 
 
 
