@@ -331,12 +331,12 @@ public:
             for (int i = 0; i < sz; i++) {
                 if (checkInVisited(reverseDeq.at(i)->data)) {
                     DEBUG_LOG("checkInVisited: " + std::to_string(reverseDeq.at(i)->data));
-                    auto node = map1[deq.at(i)->data];
-                    NodeType* res = mergeTrees(deq.at(i), node);
-                    return FinderResult{ source, target, true, res, deq.size() , _operations };
+                    auto node = map1[reverseDeq.at(i)->data];
+                    NodeType* res = mergeTrees(reverseDeq.at(i), node);
+                    return FinderResult{ source, target, true, res, reverseDeq.size() , _operations };
                 }
                 else {
-                    map2.insert({ deq.at(i)->data, deq.at(i) });
+                    map2.insert({ reverseDeq.at(i)->data, reverseDeq.at(i) });
                     NodeType* node = reverseDeq.front();
                     reverseDeq.pop_front();
                     if (node) {
@@ -599,10 +599,22 @@ private:
         NodeType* first = pair.first;
         NodeType* second = pair.second;
 
-        if (first && second) {
+        if (first) {
             std::cout << std::endl;
-            std::cout << "first:" << first->data << "second:" << second->data << std::endl;
+            std::cout << "first:" << first->data << std::endl;
             std::cout << std::endl;
+        }
+        else {
+            DEBUG_LOG("null first");
+        }
+        
+        if (second) {
+            std::cout << std::endl;
+            std::cout << "second:" << second->data << std::endl;
+            std::cout << std::endl;
+        }
+        else {
+            DEBUG_LOG("null sec");
         }
 
         if (first) {

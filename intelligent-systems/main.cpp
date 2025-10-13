@@ -181,7 +181,7 @@ int f3_reverse(int a) {
 
 void OperationSequenceFinderTest() 
 {
-//#define DEBUG_LOG_ENABLED
+#define DEBUG_LOG_ENABLED
 
 
 	OperationSequenceFinder finder{};
@@ -237,16 +237,38 @@ void bidirectionalFinder()
 	reverseOperations.push_back({ "-3", f2_reverse });
 	finder.setReverseOperations(reverseOperations);
 
-	auto res = finder.findSequenceBidir(1, 100);
-	res.print();
+	FINDER_TIME_TEST_MCS(finder.findSequenceBidir, 1, 5000000, 31);
+}
+
+void forwardVSbidir() {
+	OperationSequenceFinder finder{};
+
+	std::vector<std::pair<std::string, std::function<int(int)>>> operations;
+	operations.push_back({ "*2", f1 });
+	operations.push_back({ "+3", f2 });
+	finder.setOperations(operations);
+
+	std::vector<std::pair<std::string, std::function<int(int)>>> reverseOperations;
+	reverseOperations.push_back({ ":2", f1_reverse });
+	reverseOperations.push_back({ "-3", f2_reverse });
+	finder.setReverseOperations(reverseOperations);
+
+	
+
+	FINDER_TIME_TEST_MCS(finder.findSequenceBFS, 1, 5000000, 31);
+	FINDER_TIME_TEST_MCS(finder.findSequenceBidir, 1, 5000000, 31);
 }
 
 int main() 
 {
 	//OperationSequenceFinderTest();
-	bidirectionalFinder();
-
+	
 	//reverseTree();
+	bidirectionalFinder();
+	
+
+	// Скорость многократно!
+	//forwardVSbidir();
 
 
 
