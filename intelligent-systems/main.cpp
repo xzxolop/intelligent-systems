@@ -266,7 +266,11 @@ void graphTest() {
 	g.addToGraph("A", "B", 10);
 	g.addToGraph("A", "C", 15);
 	g.addToGraph("B", "D", 5);
+	g.addToGraph("C", "D", 3);
+	g.addToGraph("D");
 	g.print();
+
+	g.deikstra("A", "D");
 }
 
 
