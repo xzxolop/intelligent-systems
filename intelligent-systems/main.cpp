@@ -8,6 +8,7 @@
 
 #include "OperationSequenceFinder.h"
 #include "macros.h"
+#include "Graph.h"
 
 
 class Node {
@@ -259,9 +260,21 @@ void forwardVSbidir() {
 	FINDER_TIME_TEST_MCS(finder.findSequenceBidir, 1, 5000000, 31);
 }
 
+void graphTest() {
+
+	Graph<std::string> g;
+	g.addToGraph("A", "B", 10);
+	g.addToGraph("A", "C", 15);
+	g.addToGraph("B", "D", 5);
+	g.print();
+}
+
+
 int main() 
 {
-	OperationSequenceFinderTest();
+	graphTest();
+
+	//OperationSequenceFinderTest();
 	
 	//reverseTree();
 	//bidirectionalFinder();
