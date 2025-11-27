@@ -268,15 +268,35 @@ void graphTest() {
 	g.addToGraph("B", "D", 5);
 	g.addToGraph("C", "D", 3);
 	g.addToGraph("D");
-	g.print();
+	g.printGraph();
 
-	g.deikstra("A", "D");
+	int res = g.deikstra("A", "D");
+	std::cout << "res: " << res << std::endl;
+
+}
+
+void graphTest2() {
+
+	Graph<std::string> g;
+
+	g.addToGraph("A", "B", 5);
+	g.addToGraph("A", "C", 0);
+	g.addToGraph("B", "D", 15);
+	g.addToGraph("B", "E", 20);
+	g.addToGraph("C", "D", 30);
+	g.addToGraph("C", "D", 30);
+	g.addToGraph("D", "F", 20);
+	g.addToGraph("E", "F", 10);
+	g.addToGraph("F");
+
+	int res = g.deikstra("A", "F");
+	std::cout << "res: " << res << std::endl;
 }
 
 
 int main() 
 {
-	graphTest();
+	graphTest2();
 
 	//OperationSequenceFinderTest();
 	
