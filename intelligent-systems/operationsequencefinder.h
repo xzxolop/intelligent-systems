@@ -658,7 +658,7 @@ private:
     std::deque<NodeType*> deq;
     std::deque<NodeType*> reverseDeq;
 
-    // Без указателя будет переполнение стека?
+    // Без указателя будет переполнение стека? Нет, т.к. эти данные выделяются в динасической памяти.
     std::stack<NodeType*> stack;
 
     std::vector<std::pair<std::string, std::function<int(int)>>> _operations;
