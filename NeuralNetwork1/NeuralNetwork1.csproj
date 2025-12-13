@@ -84,6 +84,7 @@
     </Compile>
     <Compile Include="ImageGenerator.cs" />
     <Compile Include="Neural.cs" />
+    <Compile Include="Neuron.cs" />
     <Compile Include="StudentNetwork.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define EnableAccordNet
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +16,8 @@ namespace NeuralNetwork1
         [STAThread]
         static void Main()
         {
+
+#if EnableAccordNet
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new NeuralNetworksStand(new Dictionary<string, Func<int[], BaseNetwork>>
@@ -22,6 +26,13 @@ namespace NeuralNetwork1
                 {"Accord.Net Perseptron", structure => new AccordNet(structure)},
                 {"Студентческий персептрон", structure => new StudentNetwork(structure)},
             }));
+#endif
+
+            Console.WriteLine("Hello!");
+
+            Neuron neuron = new Neuron();
+            double res = neuron.activationFunction(228);
+            Console.WriteLine(res);
         }
     }
 }
