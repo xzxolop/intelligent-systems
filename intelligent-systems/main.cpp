@@ -293,10 +293,20 @@ void graphTest2() {
 	std::cout << "res: " << res << std::endl;
 }
 
+int neg(int i) { return -i; }
+
+template <typename T>
+typename T::value_type negative(T t) {
+	return -t;
+}
+
 
 int main() 
 {
-	graphTest2();
+	std::cout << neg(2.0) << std::endl;
+
+	//graphTest2();
+	//std::vector<bool> v;
 
 	//OperationSequenceFinderTest();
 	

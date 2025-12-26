@@ -1,5 +1,6 @@
 ﻿//#define EnableAccordNet
 
+using Accord.Math.Random;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,12 +28,21 @@ namespace NeuralNetwork1
                 {"Студентческий персептрон", structure => new StudentNetwork(structure)},
             }));
 #endif
+            GenerateImage generator = new GenerateImage();
+            SamplesSet samplesSet = new SamplesSet();
 
-            Console.WriteLine("Hello!");
+            // Создаём 100 различных фигур
+            for (int i = 0; i < 10; i++)
+            {
+                // Генерация случайной фигуры
+                Sample sample = generator.GenerateFigure();
+                samplesSet.AddSample(sample);
+                Console.WriteLine($"Фигура {i + 1}: {sample.actualClass}");
+            }
 
-            Neuron neuron = new Neuron();
-            double res = neuron.activationFunction(228);
-            Console.WriteLine(res);
+            Sample s1 = samplesSet[0];
+            
+            Console.WriteLine(s1);
         }
     }
 }

@@ -9,7 +9,6 @@ namespace NeuralNetwork1
     public class Neuron
     {
 
-        // или более правильно:
         short signal;
 
         public void setSignal(short x)
