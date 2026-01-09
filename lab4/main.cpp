@@ -66,6 +66,7 @@ class game
 		return i;
 	}
 
+	// Проверка на границы
 	bool check_bounds_ok(__int8 pos, directions dir)
 	{
 		switch (dir)
@@ -128,6 +129,7 @@ class game
 		return false;
 	}
 
+	// Переворот фишек
 	void repaint_cells(std::array<__int8, BOARD_SIZE>& _board, __int8 pos, __int8 current_color)
 	{
 		for (directions dir = directions::up; dir < 8; dir = (directions)(dir + 1))
@@ -164,24 +166,13 @@ class game
 		}
 	}
 
+	// ход бота
 	void make_move()
 	{
+		
 		bot_has_moves = false;
 		__int8 pos = 0;
-		/*for (__int8 i = 0; i < BOARD_SIZE; ++i)
-			if (!board[i] && can_make_move(i, bot_color))
-			{
-				if (bot_has_moves)
-				{
-					if (weights[i] > weights[pos])
-						pos = i;
-				}
-				else
-				{
-					pos = i;
-				}
-				bot_has_moves = true;
-			}*/
+
 		minimax(board, 0, bot_color, pos);
 		if (pos != -1)
 		{
@@ -309,6 +300,9 @@ class game
 		return 4;
 	}
 
+	/*
+	Рекурсивно перебирает все возможные ходы до глубины MAX_DEPTH и оценивает позицию
+	*/
 	short minimax(std::array<__int8, BOARD_SIZE> _board, __int8 depth, __int8 current_color, __int8& best_move)
 	{
 		best_move = -1;
